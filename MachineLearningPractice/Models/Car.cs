@@ -10,6 +10,7 @@ namespace MachineLearningPractice.Models
     class Car
     {
         public Point Location { get; set; }
+        public Size Size { get; set; }
 
         public double Velocity { get; private set; }
         public double Angle { get; private set; }

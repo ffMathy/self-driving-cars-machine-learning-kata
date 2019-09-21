@@ -9,10 +9,16 @@ namespace MachineLearningPractice.Services
     class CarNeuralNetwork
     {
         public void Train(
-            CarSimulationTick tick, 
-            )
+            CarSensorReading sensorReading,
+            CarSimulationTick carSimulationTick)
         {
 
+        }
+
+        public CarSimulationTick Ask(
+            CarSensorReading sensorReading)
+        {
+            throw new NotImplementedException();
         }
     }
 }

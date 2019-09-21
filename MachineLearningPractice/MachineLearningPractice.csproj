@@ -58,6 +58,7 @@
     <Compile Include="Helpers\DirectionHelper.cs" />
     <Compile Include="Models\Car.cs" />
     <Compile Include="Models\Direction.cs" />
+    <Compile Include="Models\Map.cs" />
     <Compile Include="Models\MapNode.cs" />
     <Compile Include="Services\CarNeuralNetwork.cs" />
     <Compile Include="Services\CarSimulation.cs" />
