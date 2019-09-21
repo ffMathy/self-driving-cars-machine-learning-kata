@@ -85,7 +85,7 @@ namespace MachineLearningPractice.Services
                 EntranceDirection = entranceDirection,
                 ExitDirection = exitDirection,
                 Lines = lines.ToArray(),
-                Point = origin
+                Position = origin
             };
         }
 

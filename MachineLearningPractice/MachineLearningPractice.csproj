@@ -56,8 +56,11 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Helpers\DirectionHelper.cs" />
+    <Compile Include="Models\Car.cs" />
     <Compile Include="Models\Direction.cs" />
     <Compile Include="Models\MapNode.cs" />
+    <Compile Include="Services\CarNeuralNetwork.cs" />
+    <Compile Include="Services\CarSimulation.cs" />
     <Compile Include="Services\MapBuilder.cs" />
     <Compile Include="Services\MapGeneratorService.cs" />
     <Page Include="MainWindow.xaml">

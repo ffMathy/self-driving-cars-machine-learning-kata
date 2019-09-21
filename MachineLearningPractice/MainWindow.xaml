@@ -12,8 +12,13 @@
             <RowDefinition Height="Auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
         <Button Name="GenerateNewMapButton" Click="GenerateNewMapButton_Click" Padding="24">Generate new map</Button>
-        <Canvas HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="1" Name="MapCanvas">
+        <Button Grid.Column="1" Name="TrainGenerationButton" Click="TrainGenerationButton_Click" Padding="24">Train single generation</Button>
+        <Canvas Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="1" Name="MapCanvas">
             
         </Canvas>
     </Grid>

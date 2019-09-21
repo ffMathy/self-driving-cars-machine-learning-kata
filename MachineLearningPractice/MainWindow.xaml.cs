@@ -25,7 +25,7 @@ namespace MachineLearningPractice
         private readonly Random random;
         private readonly DirectionHelper directionHelper;
 
-        private const int Spacing = 50;
+        private const int Spacing = 100;
 
         public MainWindow()
         {
@@ -39,6 +39,20 @@ namespace MachineLearningPractice
         private void GenerateNewMapButton_Click(object sender, RoutedEventArgs e)
         {
             GenerateNewMap();
+        }
+
+        private void TrainGenerationButton_Click(object sender, RoutedEventArgs e)
+        {
+            TrainGeneration();
+        }
+
+        private void TrainGeneration()
+        {
+            var simulations = new List<CarSimulation>();
+            for(var i=0;i<50;i++)
+            {
+                simulations.Add(new CarSimulation(random, 0.1));
+            }
         }
 
         private void GenerateNewMap()
@@ -68,18 +82,17 @@ namespace MachineLearningPractice
             {
                 Width = nodeSize,
                 Height = nodeSize,
-                Stroke = Brushes.Gray,
-                StrokeThickness = 1
+                Fill = Brushes.Gray,
+                Opacity = 0.25
             };
             MapCanvas.Children.Add(ellipse);
 
-            Canvas.SetLeft(ellipse, node.Point.X * Spacing - nodeSize / 2);
-            Canvas.SetTop(ellipse, node.Point.Y * Spacing - nodeSize / 2);
+            Canvas.SetLeft(ellipse, node.Position.X * Spacing - nodeSize / 2);
+            Canvas.SetTop(ellipse, node.Position.Y * Spacing - nodeSize / 2);
         }
 
         private void AddLine(Models.Line line)
         {
-
             MapCanvas.Children.Add(new Line()
             {
                 X1 = line.Start.X * Spacing,

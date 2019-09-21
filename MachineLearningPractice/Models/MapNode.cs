@@ -12,7 +12,7 @@ namespace MachineLearningPractice.Models
         public Direction EntranceDirection { get; set; }
         public Direction ExitDirection { get; set; }
 
-        public Point Point { get; set; }
+        public Point Position { get; set; }
 
         public Line[] Lines { get;set;}
     }
