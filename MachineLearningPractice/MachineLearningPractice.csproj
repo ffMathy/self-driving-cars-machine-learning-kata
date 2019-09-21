@@ -56,6 +56,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Helpers\DirectionHelper.cs" />
+    <Compile Include="Models\BoundingBox.cs" />
     <Compile Include="Models\Car.cs" />
     <Compile Include="Models\Direction.cs" />
     <Compile Include="Models\Map.cs" />
