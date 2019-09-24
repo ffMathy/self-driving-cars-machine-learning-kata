@@ -2,6 +2,7 @@
 using Accord.MachineLearning.VectorMachines.Learning;
 using Accord.Statistics.Kernels;
 using Accord.Statistics.Models.Regression.Linear;
+using MachineLearningPractice.Models;
 using Microsoft.ML;
 using System;
 using System.Collections.Generic;
