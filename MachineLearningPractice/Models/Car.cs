@@ -39,17 +39,55 @@ namespace MachineLearningPractice.Models
 
         public CarSensorReading GetSensorReadings(Map map)
         {
-
-        }
-
-        private CarSensorReading GetSensorReading(Map map)
-        {
-
+            return new CarSensorReading()
+            {
+                LeftSensorDistanceToWall = GetSensorReading(map, -45),
+                CenterSensorDistanceToWall = GetSensorReading(map, 0),
+                RightSensorDistanceToWall = GetSensorReading(map, 45)
+            };
         }
 
         public void Tick()
         {
+            var directionalVector = GetRotatedOnePixelLine(Angle);
 
+            BoundingBox.Location.X += directionalVector.End.X * Velocity;
+            BoundingBox.Location.Y += directionalVector.End.Y * Velocity;
+        }
+
+        private double GetSensorReading(Map map, double angleInDegrees)
+        {
+            var sensorLine = GetRotatedOnePixelLine(angleInDegrees);
+
+            foreach (var node in map.Nodes)
+            {
+                foreach (var line in node.Lines)
+                {
+                    var intersectionPoint = sensorLine.GetIntersectionPointWith(line);
+                    if (intersectionPoint == null)
+                        continue;
+
+                    var distance = BoundingBox.Center.GetDistanceTo(intersectionPoint);
+                    return distance;
+                }
+            }
+
+            throw new InvalidOperationException("Did not find any intersection points.");
+        }
+
+        private Line GetRotatedOnePixelLine(double angleInDegrees)
+        {
+            var sensorLine = new Line()
+            {
+                Start = new Point(0, 0),
+                End = new Point(0, 1)
+            };
+
+            sensorLine.End = sensorLine.End.RotateAround(
+                sensorLine.Start,
+                angleInDegrees + Angle);
+
+            return sensorLine;
         }
     }
 }
