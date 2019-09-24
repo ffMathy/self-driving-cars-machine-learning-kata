@@ -7,19 +7,6 @@ using System.Threading.Tasks;
 
 namespace MachineLearningPractice.Services
 {
-    struct CarResponse
-    {
-        public double AccelerationDeltaVelocity { get; set; }
-        public double TurnDeltaAngle { get; set; }
-    }
-
-    struct CarSensorReading
-    {
-        public double LeftSensorDistanceToWall { get; set; }
-        public double CenterSensorDistanceToWall { get; set; }
-        public double RightSensorDistanceToWall { get; set; }
-    }
-
     class CarSimulation
     {
         private readonly Car car;
