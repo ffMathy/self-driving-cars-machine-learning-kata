@@ -110,6 +110,8 @@
     <Compile Include="Models\Direction.cs" />
     <Compile Include="Models\Map.cs" />
     <Compile Include="Models\MapNode.cs" />
+    <Compile Include="Models\Size.cs" />
+    <Compile Include="Models\Point.cs" />
     <Compile Include="Services\CarNeuralNetwork.cs" />
     <Compile Include="Services\CarSimulation.cs" />
     <Compile Include="Services\MapBuilder.cs" />

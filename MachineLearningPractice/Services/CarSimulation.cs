@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MachineLearningPractice.Services
 {
-    struct CarSimulationTick
+    struct CarResponse
     {
         public double AccelerationDeltaVelocity { get; set; }
         public double TurnDeltaAngle { get; set; }
@@ -26,7 +26,7 @@ namespace MachineLearningPractice.Services
         private readonly Random random;
         private readonly CarNeuralNetwork carNeuralNetwork;
 
-        private readonly LinkedList<CarSimulationTick> tickHistory;
+        private readonly LinkedList<CarResponse> responseHistory;
 
         private readonly double randomnessFactor;
 
@@ -38,7 +38,7 @@ namespace MachineLearningPractice.Services
             double randomnessFactor)
         {
             this.car = new Car();
-            this.tickHistory = new LinkedList<CarSimulationTick>();
+            this.responseHistory = new LinkedList<CarResponse>();
 
             this.random = random;
             this.carNeuralNetwork = carNeuralNetwork;
@@ -47,18 +47,18 @@ namespace MachineLearningPractice.Services
 
         public void Tick()
         {
-            var neuralNetTick = carNeuralNetwork.Ask()
+            //var neuralNetTick = carNeuralNetwork.Ask()
 
-            var tickWithRandomness = new CarSimulationTick()
-            {
-                AccelerationDeltaVelocity = tick.AccelerationDeltaVelocity + GetRandomnessFactor(),
-                TurnDeltaAngle = tick.TurnDeltaAngle + GetRandomnessFactor()
-            };
+            //var carResponse = new CarResponse()
+            //{
+            //    AccelerationDeltaVelocity = tick.AccelerationDeltaVelocity + GetRandomnessFactor(),
+            //    TurnDeltaAngle = tick.TurnDeltaAngle + GetRandomnessFactor()
+            //};
 
-            car.Accelerate(tickWithRandomness.AccelerationDeltaVelocity);
-            car.Turn(tickWithRandomness.TurnDeltaAngle);
+            //car.Accelerate(carResponse.AccelerationDeltaVelocity);
+            //car.Turn(carResponse.TurnDeltaAngle);
 
-            tickHistory.AddLast(tickWithRandomness);
+            //responseHistory.AddLast(carResponse);
         }
 
         private double GetRandomnessFactor()

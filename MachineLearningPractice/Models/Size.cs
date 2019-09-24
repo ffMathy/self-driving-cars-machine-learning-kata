@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace MachineLearningPractice.Models
 {
-    class Map
+    class Size
     {
-        public MapNode[] Nodes { get; set; }
+        public double Width { get; set; }
+        public double Height { get; set; }
     }
 }

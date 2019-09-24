@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
+
 
 namespace MachineLearningPractice.Models
 {
     class Car
     {
-        public Point Location { get; set; }
-        public Size Size { get; set; }
+        public BoundingBox BoundingBox { get; set; }
 
         public double Velocity { get; private set; }
         public double Angle { get; private set; }
@@ -23,6 +22,11 @@ namespace MachineLearningPractice.Models
         public void Accelerate(double deltaVelocity)
         {
             Velocity += deltaVelocity;
+        }
+
+        public void Tick()
+        {
+
         }
     }
 }

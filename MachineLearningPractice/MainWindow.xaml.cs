@@ -51,7 +51,10 @@ namespace MachineLearningPractice
             var simulations = new List<CarSimulation>();
             for(var i=0;i<50;i++)
             {
-                simulations.Add(new CarSimulation(random, 0.1));
+                simulations.Add(new CarSimulation(
+                    random, 
+                    new CarNeuralNetwork(),
+                    0.1));
             }
         }
 
