@@ -1,4 +1,5 @@
 ﻿using MachineLearningPractice.Helpers;
+using MachineLearningPractice.Models;
 using MachineLearningPractice.Services;
 using System;
 using System.Collections.Generic;
@@ -23,13 +24,17 @@ namespace MachineLearningPractice
     public partial class MainWindow : Window
     {
         private readonly Random random;
+        private readonly CarNeuralNetwork carNeuralNetwork;
         private readonly DirectionHelper directionHelper;
+
+        private Map map;
 
         private const int Spacing = 100;
 
         public MainWindow()
         {
             this.random = new Random();
+            this.carNeuralNetwork = new CarNeuralNetwork();
             this.directionHelper = new DirectionHelper(this.random);
 
             InitializeComponent();
@@ -52,8 +57,9 @@ namespace MachineLearningPractice
             for(var i=0;i<50;i++)
             {
                 simulations.Add(new CarSimulation(
-                    random, 
-                    new CarNeuralNetwork(),
+                    random,
+                    map,
+                    carNeuralNetwork,
                     0.1));
             }
         }
@@ -65,9 +71,9 @@ namespace MachineLearningPractice
             var mapGeneratorService = new MapGeneratorService(
                 this.random,
                 this.directionHelper);
-            var mapNodes = mapGeneratorService.PickRandomPredefinedMap();
+            map = mapGeneratorService.PickRandomPredefinedMap();
 
-            foreach (var node in mapNodes)
+            foreach (var node in map.Nodes)
             {
                 AddCircle(node);
 
@@ -81,6 +87,7 @@ namespace MachineLearningPractice
         private void AddCircle(Models.MapNode node)
         {
             const int nodeSize = 10;
+
             var ellipse = new Ellipse()
             {
                 Width = nodeSize,
@@ -96,7 +103,7 @@ namespace MachineLearningPractice
 
         private void AddLine(Models.Line line)
         {
-            MapCanvas.Children.Add(new Line()
+            MapCanvas.Children.Add(new System.Windows.Shapes.Line()
             {
                 X1 = line.Start.X * Spacing,
                 Y1 = line.Start.Y * Spacing,

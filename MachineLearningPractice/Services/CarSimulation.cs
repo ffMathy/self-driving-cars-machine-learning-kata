@@ -11,41 +11,54 @@ namespace MachineLearningPractice.Services
     {
         private readonly Car car;
         private readonly Random random;
+        private readonly Map map;
         private readonly CarNeuralNetwork carNeuralNetwork;
 
-        private readonly LinkedList<CarResponse> responseHistory;
+        private readonly List<CarSimulationTick> pendingTrainingInstructions;
 
         private readonly double randomnessFactor;
 
         public Car Car => car;
 
+        public IReadOnlyList<CarSimulationTick> PendingTrainingInstructions => pendingTrainingInstructions;
+
         public CarSimulation(
             Random random,
+            Map map,
             CarNeuralNetwork carNeuralNetwork,
             double randomnessFactor)
         {
             this.car = new Car();
-            this.responseHistory = new LinkedList<CarResponse>();
+
+            this.pendingTrainingInstructions = new List<CarSimulationTick>();
 
             this.random = random;
+            this.map = map;
             this.carNeuralNetwork = carNeuralNetwork;
             this.randomnessFactor = randomnessFactor;
         }
 
         public void Tick()
         {
-            //var neuralNetTick = carNeuralNetwork.Ask()
+            var sensorReading = car.GetSensorReadings(map);
+            var neuralNetCarResponse = this.carNeuralNetwork.Ask(sensorReading);
 
-            //var carResponse = new CarResponse()
-            //{
-            //    AccelerationDeltaVelocity = tick.AccelerationDeltaVelocity + GetRandomnessFactor(),
-            //    TurnDeltaAngle = tick.TurnDeltaAngle + GetRandomnessFactor()
-            //};
+            var adjustedCarResponse = new CarResponse()
+            {
+                AccelerationDeltaVelocity = neuralNetCarResponse.AccelerationDeltaVelocity + GetRandomnessFactor(),
+                TurnDeltaAngle = neuralNetCarResponse.TurnDeltaAngle + GetRandomnessFactor()
+            };
 
-            //car.Accelerate(carResponse.AccelerationDeltaVelocity);
-            //car.Turn(carResponse.TurnDeltaAngle);
+            car.Accelerate(adjustedCarResponse.AccelerationDeltaVelocity);
+            car.Turn(adjustedCarResponse.TurnDeltaAngle);
 
-            //responseHistory.AddLast(carResponse);
+            car.Tick();
+
+            pendingTrainingInstructions.Add(new CarSimulationTick()
+            {
+                CarResponse = adjustedCarResponse,
+                CarSensorReading = sensorReading
+            });
         }
 
         private double GetRandomnessFactor()
