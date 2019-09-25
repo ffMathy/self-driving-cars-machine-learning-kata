@@ -22,10 +22,15 @@ namespace MachineLearningPractice.Models
 
     class Car
     {
-        public BoundingBox BoundingBox { get; set; }
+        public BoundingBox BoundingBox { get; }
 
         public double Velocity { get; private set; }
         public double Angle { get; private set; }
+
+        public Car()
+        {
+            BoundingBox = new BoundingBox();
+        }
 
         public void Turn(double deltaAngle)
         {

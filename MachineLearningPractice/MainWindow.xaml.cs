@@ -46,12 +46,12 @@ namespace MachineLearningPractice
             GenerateNewMap();
         }
 
-        private void TrainGenerationButton_Click(object sender, RoutedEventArgs e)
+        private async void TrainGenerationButton_Click(object sender, RoutedEventArgs e)
         {
-            TrainGeneration();
+            await TrainGeneration();
         }
 
-        private void TrainGeneration()
+        private async Task TrainGeneration()
         {
             var simulations = new List<CarSimulation>();
             for(var i=0;i<50;i++)
@@ -62,46 +62,93 @@ namespace MachineLearningPractice
                     carNeuralNetwork,
                     0.1));
             }
+
+            var hasCrashed = false;
+            while(!hasCrashed)
+            {
+                ClearCanvas();
+                RenderMap();
+
+                foreach(var simulation in simulations)
+                {
+                    RenderCar(simulation.Car);
+
+                    simulation.Tick();
+                }
+
+                await Task.Delay(1000);
+
+                break;
+            }
         }
 
         private void GenerateNewMap()
         {
-            MapCanvas.Children.Clear();
+            ClearCanvas();
 
             var mapGeneratorService = new MapGeneratorService(
                 this.random,
                 this.directionHelper);
             map = mapGeneratorService.PickRandomPredefinedMap();
 
+            RenderMap();
+        }
+
+        private void ClearCanvas()
+        {
+            MapCanvas.Children.Clear();
+        }
+
+        private void RenderMap()
+        {
             foreach (var node in map.Nodes)
             {
-                AddCircle(node);
+                RenderMapNode(node);
 
                 foreach (var line in node.Lines)
                 {
-                    AddLine(line);
+                    RenderLine(line);
                 }
             }
         }
 
-        private void AddCircle(Models.MapNode node)
+        private void RenderCar(Car car)
         {
-            const int nodeSize = 10;
+            const int nodeSize = Spacing / 3;
 
-            var ellipse = new Ellipse()
+            var rectangle = new Rectangle()
             {
                 Width = nodeSize,
                 Height = nodeSize,
-                Fill = Brushes.Gray,
-                Opacity = 0.25
+                Fill = Brushes.Transparent,
+                Stroke = Brushes.Gray,
+                StrokeThickness = 1,
+                Opacity = 1
             };
-            MapCanvas.Children.Add(ellipse);
+            MapCanvas.Children.Add(rectangle);
 
-            Canvas.SetLeft(ellipse, node.Position.X * Spacing - nodeSize / 2);
-            Canvas.SetTop(ellipse, node.Position.Y * Spacing - nodeSize / 2);
+            Canvas.SetLeft(rectangle, car.BoundingBox.Location.X * Spacing - nodeSize / 2);
+            Canvas.SetTop(rectangle, car.BoundingBox.Location.Y * Spacing - nodeSize / 2);
         }
 
-        private void AddLine(Models.Line line)
+        private void RenderMapNode(Models.MapNode node)
+        {
+            const int nodeSize = Spacing;
+
+            var rectangle = new Rectangle()
+            {
+                Width = nodeSize,
+                Height = nodeSize,
+                Fill = Brushes.White,
+                Opacity = 1
+            };
+            MapCanvas.Children.Add(rectangle);
+
+            Canvas.SetLeft(rectangle, node.Position.X * Spacing - nodeSize / 2);
+            Canvas.SetTop(rectangle, node.Position.Y * Spacing - nodeSize / 2);
+        }
+
+        private void RenderLine(Models.Line line)
         {
             MapCanvas.Children.Add(new System.Windows.Shapes.Line()
             {
@@ -110,7 +157,7 @@ namespace MachineLearningPractice
                 X2 = line.End.X * Spacing,
                 Y2 = line.End.Y * Spacing,
                 Stroke = Brushes.Black,
-                StrokeThickness = 1
+                StrokeThickness = 2
             });
         }
     }

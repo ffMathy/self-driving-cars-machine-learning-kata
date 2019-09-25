@@ -16,5 +16,11 @@ namespace MachineLearningPractice.Models
             Location.Y + Size.Height / 2);
 
         public Point Location { get; set; }
+
+        public BoundingBox()
+        {
+            Location = new Point();
+            Size = new Size();
+        }
     }
 }
