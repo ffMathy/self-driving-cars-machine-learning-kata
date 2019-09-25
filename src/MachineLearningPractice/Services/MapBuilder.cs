@@ -85,7 +85,10 @@ namespace MachineLearningPractice.Services
                 EntranceDirection = entranceDirection,
                 ExitDirection = exitDirection,
                 Lines = lines.ToArray(),
-                Position = origin
+                Position = new Point(
+                    Map.TileSize,
+                    origin.X, 
+                    origin.Y)
             };
         }
 
@@ -93,8 +96,8 @@ namespace MachineLearningPractice.Services
         {
             return new Line()
             {
-                Start = new Point(0.5 + origin.X, -0.5 + origin.Y),
-                End = new Point(0.5 + origin.X, 0.5 + origin.Y)
+                Start = new Point(Map.TileSize, 0.5 + origin.X, -0.5 + origin.Y),
+                End = new Point(Map.TileSize, 0.5 + origin.X, 0.5 + origin.Y)
             };
         }
 
@@ -102,8 +105,8 @@ namespace MachineLearningPractice.Services
         {
             return new Line()
             {
-                Start = new Point(-0.5 + origin.X, -0.5 + origin.Y),
-                End = new Point(-0.5 + origin.X, 0.5 + origin.Y)
+                Start = new Point(Map.TileSize, -0.5 + origin.X, -0.5 + origin.Y),
+                End = new Point(Map.TileSize, -0.5 + origin.X, 0.5 + origin.Y)
             };
         }
 
@@ -111,8 +114,8 @@ namespace MachineLearningPractice.Services
         {
             return new Line()
             {
-                Start = new Point(-0.5 + origin.X, 0.5 + origin.Y),
-                End = new Point(0.5 + origin.X, 0.5 + origin.Y)
+                Start = new Point(Map.TileSize, -0.5 + origin.X, 0.5 + origin.Y),
+                End = new Point(Map.TileSize, 0.5 + origin.X, 0.5 + origin.Y)
             };
         }
 
@@ -120,8 +123,8 @@ namespace MachineLearningPractice.Services
         {
             return new Line()
             {
-                Start = new Point(-0.5 + origin.X, -0.5 + origin.Y),
-                End = new Point(0.5 + origin.X, -0.5 + origin.Y)
+                Start = new Point(Map.TileSize, -0.5 + origin.X, -0.5 + origin.Y),
+                End = new Point(Map.TileSize, 0.5 + origin.X, -0.5 + origin.Y)
             };
         }
     }

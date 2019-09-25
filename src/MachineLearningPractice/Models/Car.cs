@@ -27,9 +27,16 @@ namespace MachineLearningPractice.Models
         public double Velocity { get; private set; }
         public double Angle { get; private set; }
 
-        public Car()
+        public Car(double width, double height)
         {
-            BoundingBox = new BoundingBox();
+            BoundingBox = new BoundingBox()
+            {
+                Size = new Size()
+                {
+                    Width = width,
+                    Height = height
+                }
+            };
         }
 
         public void Turn(double deltaAngle)
@@ -59,6 +66,12 @@ namespace MachineLearningPractice.Models
 
         private double GetProximityToLine(Line line)
         {
+            var carFrontLine = GetRotatedOnePixelLine(Angle);
+            var intersectionPoint = carFrontLine.GetIntersectionPointWith(line);
+            if(intersectionPoint == null)
+                return double.MaxValue;
+
+            return intersectionPoint.GetDistanceTo(BoundingBox.Center);
         }
 
         public void Tick()

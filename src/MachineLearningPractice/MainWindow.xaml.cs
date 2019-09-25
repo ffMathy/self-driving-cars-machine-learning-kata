@@ -29,8 +29,6 @@ namespace MachineLearningPractice
 
         private Map map;
 
-        private const int Spacing = 100;
-
         public MainWindow()
         {
             this.random = new Random();
@@ -75,11 +73,14 @@ namespace MachineLearningPractice
                 {
                     RenderCar(simulation.Car);
 
-                    simulation.Tick();
+                    if (!simulation.Tick())
+                        hasCrashed = true;
                 }
 
-                await Task.Delay(25);
+                await Task.Delay(50);
             }
+
+            MessageBox.Show("Crashed!");
         }
 
         private void GenerateNewMap()
@@ -104,22 +105,18 @@ namespace MachineLearningPractice
             foreach (var node in map.Nodes)
             {
                 RenderMapNode(node);
-
-                foreach (var line in node.Lines)
-                {
-                    RenderLine(line);
-                }
             }
         }
 
         private void RenderCar(Car car)
         {
-            const int nodeSize = Spacing / 5;
+            var width = car.BoundingBox.Size.Width;
+            var height = car.BoundingBox.Size.Height;
 
             var rectangle = new Rectangle()
             {
-                Width = nodeSize,
-                Height = nodeSize * 2,
+                Width = width,
+                Height = height,
                 Fill = Brushes.Transparent,
                 Stroke = Brushes.Blue,
                 StrokeThickness = 1,
@@ -128,35 +125,62 @@ namespace MachineLearningPractice
             };
             MapCanvas.Children.Add(rectangle);
 
-            Canvas.SetLeft(rectangle, car.BoundingBox.Location.X * Spacing - nodeSize / 2);
-            Canvas.SetTop(rectangle, car.BoundingBox.Location.Y * Spacing - nodeSize / 2);
+            Canvas.SetLeft(rectangle, car.BoundingBox.Center.X - width / 2);
+            Canvas.SetTop(rectangle, car.BoundingBox.Center.Y - height / 2);
+
+            var sensorReadings = car.GetSensorReadings(map);
+            var sensorDistances = new[]
+            {
+                sensorReadings.LeftSensorDistanceToWall,
+                sensorReadings.CenterSensorDistanceToWall,
+                sensorReadings.RightSensorDistanceToWall
+            };
+
+            var sensorLabels = sensorDistances
+                .Select(x => Math.Round(x))
+                .Select(x => x.ToString());
+
+            var label = new TextBlock()
+            {
+                Text = sensorLabels.Aggregate((a, b) => a + "\n" + b),
+                TextAlignment = TextAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+            MapCanvas.Children.Add(label);
+
+            Canvas.SetLeft(rectangle, car.BoundingBox.Center.X - width / 2);
+            Canvas.SetTop(rectangle, car.BoundingBox.Center.Y - height / 2);
         }
 
-        private void RenderMapNode(Models.MapNode node)
+        private void RenderMapNode(MapNode node)
         {
-            const int nodeSize = Spacing;
-
             var rectangle = new Rectangle()
             {
-                Width = nodeSize,
-                Height = nodeSize,
+                Width = Map.TileSize,
+                Height = Map.TileSize,
                 Fill = Brushes.White,
                 Opacity = 1
             };
             MapCanvas.Children.Add(rectangle);
 
-            Canvas.SetLeft(rectangle, node.Position.X * Spacing - nodeSize / 2);
-            Canvas.SetTop(rectangle, node.Position.Y * Spacing - nodeSize / 2);
+            Canvas.SetLeft(rectangle, node.Position.X - Map.TileSize / 2);
+            Canvas.SetTop(rectangle, node.Position.Y - Map.TileSize / 2);
+
+            foreach (var line in node.Lines)
+            {
+                RenderLine(line);
+            }
         }
 
         private void RenderLine(Models.Line line)
         {
             MapCanvas.Children.Add(new System.Windows.Shapes.Line()
             {
-                X1 = line.Start.X * Spacing,
-                Y1 = line.Start.Y * Spacing,
-                X2 = line.End.X * Spacing,
-                Y2 = line.End.Y * Spacing,
+                X1 = line.Start.X,
+                Y1 = line.Start.Y,
+                X2 = line.End.X,
+                Y2 = line.End.Y,
                 Stroke = Brushes.Black,
                 StrokeThickness = 2
             });

@@ -32,7 +32,9 @@ namespace MachineLearningPractice.Services
         {
             this.ticksSurvived = 0;
 
-            this.car = new Car();
+            this.car = new Car(
+                Map.TileSize / 5,
+                Map.TileSize / 3);
 
             this.pendingTrainingInstructions = new List<CarSimulationTick>();
 
@@ -42,15 +44,20 @@ namespace MachineLearningPractice.Services
             this.randomnessFactor = randomnessFactor;
         }
 
-        public void Tick()
+        public bool Tick()
         {
             var sensorReading = car.GetSensorReadings(map);
+
+            var delta = 0.0001;
+            if (sensorReading.CenterSensorDistanceToWall < delta || sensorReading.LeftSensorDistanceToWall < delta || sensorReading.RightSensorDistanceToWall < delta)
+                return false;
+
             var neuralNetCarResponse = this.carNeuralNetwork.Ask(sensorReading);
 
             var adjustedCarResponse = new CarResponse()
             {
-                AccelerationDeltaVelocity = neuralNetCarResponse.AccelerationDeltaVelocity + GetRandomnessFactor(0.05),
-                TurnDeltaAngle = neuralNetCarResponse.TurnDeltaAngle + GetRandomnessFactor(5)
+                AccelerationDeltaVelocity = neuralNetCarResponse.AccelerationDeltaVelocity + GetRandomnessFactor(5),
+                TurnDeltaAngle = neuralNetCarResponse.TurnDeltaAngle + GetRandomnessFactor(25)
             };
 
             car.Accelerate(adjustedCarResponse.AccelerationDeltaVelocity);
@@ -65,6 +72,8 @@ namespace MachineLearningPractice.Services
             });
 
             ticksSurvived++;
+
+            return true;
         }
 
         private double GetRandomnessFactor(double multiplier)

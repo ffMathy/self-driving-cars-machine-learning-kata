@@ -22,6 +22,10 @@ namespace MachineLearningPractice.Models
             Y = y;
         }
 
+        public Point(double factor, double x, double y) : this(x * factor, y * factor)
+        {
+        }
+
         public Point RotateAround(Point centerPoint, double angleInDegrees)
         {
             var pointToRotate = this; 
