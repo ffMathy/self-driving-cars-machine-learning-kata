@@ -3,7 +3,6 @@ using Accord.MachineLearning.VectorMachines.Learning;
 using Accord.Statistics.Kernels;
 using Accord.Statistics.Models.Regression.Linear;
 using MachineLearningPractice.Models;
-using Microsoft.ML;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -66,7 +65,7 @@ namespace MachineLearningPractice.Services
             CarSensorReading sensorReading)
         {
             if(this.regression == null)
-                throw new InvalidOperationException("Must train first.");
+                return new CarResponse();
 
             var prediction = this.regression.Transform(
                 GetNeuralInputFromSensorReading(sensorReading));

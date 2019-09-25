@@ -53,8 +53,10 @@ namespace MachineLearningPractice
 
         private async Task TrainGeneration()
         {
+            const int simulationCount = 5;
+
             var simulations = new List<CarSimulation>();
-            for(var i=0;i<50;i++)
+            for (var i = 0; i < simulationCount; i++)
             {
                 simulations.Add(new CarSimulation(
                     random,
@@ -64,12 +66,12 @@ namespace MachineLearningPractice
             }
 
             var hasCrashed = false;
-            while(!hasCrashed)
+            while (!hasCrashed)
             {
                 ClearCanvas();
                 RenderMap();
 
-                foreach(var simulation in simulations)
+                foreach (var simulation in simulations)
                 {
                     RenderCar(simulation.Car);
 
@@ -77,8 +79,6 @@ namespace MachineLearningPractice
                 }
 
                 await Task.Delay(1000);
-
-                break;
             }
         }
 
@@ -121,9 +121,13 @@ namespace MachineLearningPractice
                 Width = nodeSize,
                 Height = nodeSize,
                 Fill = Brushes.Transparent,
-                Stroke = Brushes.Gray,
+                Stroke = Brushes.Blue,
                 StrokeThickness = 1,
-                Opacity = 1
+                Opacity = 1,
+                RenderTransform = new RotateTransform(
+                    car.Angle, 
+                    nodeSize / 2, 
+                    nodeSize / 2)
             };
             MapCanvas.Children.Add(rectangle);
 

@@ -45,8 +45,8 @@ namespace MachineLearningPractice.Services
 
             var adjustedCarResponse = new CarResponse()
             {
-                AccelerationDeltaVelocity = neuralNetCarResponse.AccelerationDeltaVelocity + GetRandomnessFactor(),
-                TurnDeltaAngle = neuralNetCarResponse.TurnDeltaAngle + GetRandomnessFactor()
+                AccelerationDeltaVelocity = neuralNetCarResponse.AccelerationDeltaVelocity + GetRandomnessFactor(0.25),
+                TurnDeltaAngle = neuralNetCarResponse.TurnDeltaAngle + GetRandomnessFactor(15)
             };
 
             car.Accelerate(adjustedCarResponse.AccelerationDeltaVelocity);
@@ -61,9 +61,9 @@ namespace MachineLearningPractice.Services
             });
         }
 
-        private double GetRandomnessFactor()
+        private double GetRandomnessFactor(double multiplier)
         {
-            return random.NextDouble() * randomnessFactor;
+            return random.NextDouble() * randomnessFactor * multiplier;
         }
     }
 }
