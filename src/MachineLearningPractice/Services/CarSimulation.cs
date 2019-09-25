@@ -18,6 +18,8 @@ namespace MachineLearningPractice.Services
 
         private readonly double randomnessFactor;
 
+        private ulong ticksSurvived;
+
         public Car Car => car;
 
         public IReadOnlyList<CarSimulationTick> PendingTrainingInstructions => pendingTrainingInstructions;
@@ -28,6 +30,8 @@ namespace MachineLearningPractice.Services
             CarNeuralNetwork carNeuralNetwork,
             double randomnessFactor)
         {
+            this.ticksSurvived = 0;
+
             this.car = new Car();
 
             this.pendingTrainingInstructions = new List<CarSimulationTick>();
@@ -45,8 +49,8 @@ namespace MachineLearningPractice.Services
 
             var adjustedCarResponse = new CarResponse()
             {
-                AccelerationDeltaVelocity = neuralNetCarResponse.AccelerationDeltaVelocity + GetRandomnessFactor(0.25),
-                TurnDeltaAngle = neuralNetCarResponse.TurnDeltaAngle + GetRandomnessFactor(15)
+                AccelerationDeltaVelocity = neuralNetCarResponse.AccelerationDeltaVelocity + GetRandomnessFactor(0.05),
+                TurnDeltaAngle = neuralNetCarResponse.TurnDeltaAngle + GetRandomnessFactor(5)
             };
 
             car.Accelerate(adjustedCarResponse.AccelerationDeltaVelocity);
@@ -59,11 +63,13 @@ namespace MachineLearningPractice.Services
                 CarResponse = adjustedCarResponse,
                 CarSensorReading = sensorReading
             });
+
+            ticksSurvived++;
         }
 
         private double GetRandomnessFactor(double multiplier)
         {
-            return random.NextDouble() * randomnessFactor * multiplier;
+            return ((random.NextDouble() * randomnessFactor * 2) - randomnessFactor) * multiplier;
         }
     }
 }

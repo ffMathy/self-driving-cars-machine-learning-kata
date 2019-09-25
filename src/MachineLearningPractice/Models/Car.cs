@@ -44,12 +44,21 @@ namespace MachineLearningPractice.Models
 
         public CarSensorReading GetSensorReadings(Map map)
         {
+            var mapLinesOrderedByProximity = map
+                .Nodes
+                .SelectMany(x => x.Lines)
+                .OrderBy(GetProximityToLine);
+
             return new CarSensorReading()
             {
-                LeftSensorDistanceToWall = GetSensorReading(map, -45),
-                CenterSensorDistanceToWall = GetSensorReading(map, 0),
-                RightSensorDistanceToWall = GetSensorReading(map, 45)
+                LeftSensorDistanceToWall = GetSensorReading(mapLinesOrderedByProximity, -45),
+                CenterSensorDistanceToWall = GetSensorReading(mapLinesOrderedByProximity, 0),
+                RightSensorDistanceToWall = GetSensorReading(mapLinesOrderedByProximity, 45)
             };
+        }
+
+        private double GetProximityToLine(Line line)
+        {
         }
 
         public void Tick()
@@ -60,21 +69,18 @@ namespace MachineLearningPractice.Models
             BoundingBox.Location.Y += directionalVector.End.Y * Velocity;
         }
 
-        private double GetSensorReading(Map map, double angleInDegrees)
+        private double GetSensorReading(IEnumerable<Line> linesOrderedByProximity, double angleInDegrees)
         {
             var sensorLine = GetRotatedOnePixelLine(angleInDegrees);
 
-            foreach (var node in map.Nodes)
+            foreach (var line in linesOrderedByProximity)
             {
-                foreach (var line in node.Lines)
-                {
-                    var intersectionPoint = sensorLine.GetIntersectionPointWith(line);
-                    if (intersectionPoint == null)
-                        continue;
+                var intersectionPoint = sensorLine.GetIntersectionPointWith(line);
+                if (intersectionPoint == null)
+                    continue;
 
-                    var distance = BoundingBox.Center.GetDistanceTo(intersectionPoint);
-                    return distance;
-                }
+                var distance = BoundingBox.Center.GetDistanceTo(intersectionPoint);
+                return distance;
             }
 
             throw new InvalidOperationException("Did not find any intersection points.");
