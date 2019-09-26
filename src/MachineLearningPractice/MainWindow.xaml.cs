@@ -112,25 +112,19 @@ namespace MachineLearningPractice
         {
             var car = carSimulation.Car;
 
-            var width = car.BoundingBox.Size.Width;
-            var height = car.BoundingBox.Size.Height;
-
-            var angleTransform = new RotateTransform(car.Angle);
-
-            var rectangle = new Rectangle()
+            var ellipse = new Ellipse()
             {
-                Width = width,
-                Height = height,
+                Width = car.BoundingBox.Size.Width,
+                Height = car.BoundingBox.Size.Height,
                 Fill = Brushes.Transparent,
                 Stroke = Brushes.Blue,
                 StrokeThickness = 1,
-                Opacity = 1,
-                LayoutTransform = angleTransform
+                Opacity = 1
             };
-            MapCanvas.Children.Add(rectangle);
+            MapCanvas.Children.Add(ellipse);
 
-            Canvas.SetLeft(rectangle, car.BoundingBox.Center.X - width / 2);
-            Canvas.SetTop(rectangle, car.BoundingBox.Center.Y - height / 2);
+            Canvas.SetLeft(ellipse, car.BoundingBox.Location.X);
+            Canvas.SetTop(ellipse, car.BoundingBox.Location.Y);
 
             var sensorReadings = carSimulation.GetSensorReadings();
             var sensorDistances = new[]
@@ -149,13 +143,23 @@ namespace MachineLearningPractice
                 Text = sensorLabels.Aggregate((a, b) => a + "\n" + b),
                 TextAlignment = TextAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                LayoutTransform = angleTransform
+                HorizontalAlignment = HorizontalAlignment.Center
             };
             MapCanvas.Children.Add(label);
 
-            Canvas.SetLeft(label, car.BoundingBox.Center.X - width / 2);
-            Canvas.SetTop(label, car.BoundingBox.Center.Y - height / 2);
+            Canvas.SetLeft(label, car.BoundingBox.Center.X);
+            Canvas.SetTop(label, car.BoundingBox.Center.Y);
+
+            var line = new System.Windows.Shapes.Line()
+            {
+                X1 = car.BoundingBox.Center.X,
+                Y1 = car.BoundingBox.Center.Y,
+                X2 = car.BoundingBox.Center.X + (car.ForwardDirectionLine.End.X * car.BoundingBox.Size.Width),
+                Y2 = car.BoundingBox.Center.Y + (car.ForwardDirectionLine.End.Y * car.BoundingBox.Size.Height),
+                Stroke = Brushes.Blue,
+                StrokeThickness = 1
+            };
+            MapCanvas.Children.Add(line);
         }
 
         private void RenderMapNode(MapNode node)

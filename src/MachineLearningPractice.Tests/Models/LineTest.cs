@@ -29,6 +29,8 @@ namespace MachineLearningPractice.Tests.Models
         [TestMethod]
         public void RotateWorks()
         {
+            //TODO: make more tests that try to rotate along a different center point - perhaps with a car involved? perhaps even a car test?
+
             var line = new Line() {
                 Start = new Point(-1, -1),
                 End = new Point(1, 1)

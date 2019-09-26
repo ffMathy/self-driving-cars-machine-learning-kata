@@ -36,8 +36,8 @@ namespace MachineLearningPractice.Services
 
             this.car = new Car(
                 map,
-                Map.TileSize / 5,
-                Map.TileSize / 3);
+                Map.TileSize / 2,
+                Map.TileSize / 2);
 
             this.pendingTrainingInstructions = new List<CarSimulationTick>();
 
@@ -76,7 +76,7 @@ namespace MachineLearningPractice.Services
 
             var adjustedCarResponse = new CarResponse()
             {
-                AccelerationDeltaVelocity = neuralNetCarResponse.AccelerationDeltaVelocity + GetRandomnessFactor(3),
+                AccelerationDeltaVelocity = neuralNetCarResponse.AccelerationDeltaVelocity + GetRandomnessFactor(1),
                 TurnDeltaAngle = neuralNetCarResponse.TurnDeltaAngle + GetRandomnessFactor(5)
             };
 

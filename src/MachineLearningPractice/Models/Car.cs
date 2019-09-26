@@ -26,19 +26,21 @@ namespace MachineLearningPractice.Models
 
         public BoundingBox BoundingBox { get; }
 
-        public double Velocity { get; private set; }
-        public double Angle { get; private set; }
+        public double SpeedVelocity { get; private set; }
+
+        public double TurnAngle { get; private set; }
+        public double TurnAngleVelocity { get; private set; }
 
         public Line ForwardDirectionLine
         {
             get
             {
                 var line = new Line() {
-                    Start = BoundingBox.Location - new Point(0, 0.5),
-                    End = BoundingBox.Location + new Point(0, 0.5)
+                    Start = BoundingBox.Center - new Point(0, 0.5),
+                    End = BoundingBox.Center + new Point(0, 0.5)
                 };
 
-                return line.Rotate(Angle);
+                return line.Rotate(TurnAngle);
             }
         }
 
@@ -61,21 +63,25 @@ namespace MachineLearningPractice.Models
 
         public void Turn(double deltaAngle)
         {
-            Angle += deltaAngle;
+            TurnAngleVelocity += deltaAngle;
+            TurnAngleVelocity = Math.Min(10, TurnAngleVelocity);
         }
 
         public void Accelerate(double deltaVelocity)
         {
-            Velocity += deltaVelocity;
+            SpeedVelocity += deltaVelocity;
+            SpeedVelocity = Math.Min(0.1, SpeedVelocity);
         }
 
         public void Tick()
         {
             var directionalVector = ForwardDirectionLine;
 
+            TurnAngle += TurnAngleVelocity;
+
             BoundingBox.Location = new Point(
-                BoundingBox.Location.X + (directionalVector.End.X * Velocity),
-                BoundingBox.Location.Y + (directionalVector.End.Y * Velocity));
+                BoundingBox.Location.X + (directionalVector.End.X * SpeedVelocity),
+                BoundingBox.Location.Y + (directionalVector.End.Y * SpeedVelocity));
         }
     }
 }

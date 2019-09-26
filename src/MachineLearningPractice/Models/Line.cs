@@ -18,6 +18,7 @@ namespace MachineLearningPractice.Models
     {
         public Point Start { get; set; }
         public Point End { get; set; }
+
         public Point Center => new Point(
             End.X - Start.X,
             End.Y - Start.Y);
