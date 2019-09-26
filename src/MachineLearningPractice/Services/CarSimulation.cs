@@ -69,14 +69,15 @@ namespace MachineLearningPractice.Services
 
         public bool Tick()
         {
-            sensorReadingCached = GetSensorReadings();
+            sensorReadingCached = null;
 
-            var neuralNetCarResponse = this.carNeuralNetwork.Ask(sensorReadingCached.Value);
+            var sensorReadings = GetSensorReadings();
+            var neuralNetCarResponse = this.carNeuralNetwork.Ask(sensorReadings);
 
             var adjustedCarResponse = new CarResponse()
             {
-                AccelerationDeltaVelocity = neuralNetCarResponse.AccelerationDeltaVelocity + GetRandomnessFactor(5),
-                TurnDeltaAngle = neuralNetCarResponse.TurnDeltaAngle + GetRandomnessFactor(25)
+                AccelerationDeltaVelocity = neuralNetCarResponse.AccelerationDeltaVelocity + GetRandomnessFactor(3),
+                TurnDeltaAngle = neuralNetCarResponse.TurnDeltaAngle + GetRandomnessFactor(5)
             };
 
             car.Accelerate(adjustedCarResponse.AccelerationDeltaVelocity);
@@ -87,7 +88,7 @@ namespace MachineLearningPractice.Services
             pendingTrainingInstructions.Add(new CarSimulationTick()
             {
                 CarResponse = adjustedCarResponse,
-                CarSensorReading = sensorReadingCached.Value
+                CarSensorReading = sensorReadings
             });
 
             ticksSurvived++;

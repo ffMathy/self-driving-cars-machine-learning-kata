@@ -115,6 +115,8 @@ namespace MachineLearningPractice
             var width = car.BoundingBox.Size.Width;
             var height = car.BoundingBox.Size.Height;
 
+            var angleTransform = new RotateTransform(car.Angle);
+
             var rectangle = new Rectangle()
             {
                 Width = width,
@@ -123,7 +125,7 @@ namespace MachineLearningPractice
                 Stroke = Brushes.Blue,
                 StrokeThickness = 1,
                 Opacity = 1,
-                LayoutTransform = new RotateTransform(car.Angle)
+                LayoutTransform = angleTransform
             };
             MapCanvas.Children.Add(rectangle);
 
@@ -147,12 +149,13 @@ namespace MachineLearningPractice
                 Text = sensorLabels.Aggregate((a, b) => a + "\n" + b),
                 TextAlignment = TextAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
-                HorizontalAlignment = HorizontalAlignment.Center
+                HorizontalAlignment = HorizontalAlignment.Center,
+                LayoutTransform = angleTransform
             };
             MapCanvas.Children.Add(label);
 
-            Canvas.SetLeft(rectangle, car.BoundingBox.Center.X - width / 2);
-            Canvas.SetTop(rectangle, car.BoundingBox.Center.Y - height / 2);
+            Canvas.SetLeft(label, car.BoundingBox.Center.X - width / 2);
+            Canvas.SetTop(label, car.BoundingBox.Center.Y - height / 2);
         }
 
         private void RenderMapNode(MapNode node)
