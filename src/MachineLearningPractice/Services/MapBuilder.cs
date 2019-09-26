@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MachineLearningPractice.Services
 {
-    class MapBuilder
+    public class MapBuilder
     {
         private readonly List<MapNode> nodes;
         private readonly DirectionHelper directionHelper;

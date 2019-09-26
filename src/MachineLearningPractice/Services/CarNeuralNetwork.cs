@@ -11,13 +11,13 @@ using System.Threading.Tasks;
 
 namespace MachineLearningPractice.Services
 {
-    struct CarSimulationTick
+    public struct CarSimulationTick
     {
         public CarSensorReading CarSensorReading { get; set; }
         public CarResponse CarResponse { get; set; }
     }
 
-    class CarNeuralNetwork
+    public class CarNeuralNetwork
     {
         private MultivariateLinearRegression regression;
 

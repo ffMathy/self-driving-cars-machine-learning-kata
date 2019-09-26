@@ -7,28 +7,48 @@ using System.Threading.Tasks;
 
 namespace MachineLearningPractice.Models
 {
-    struct CarResponse
+    public struct CarResponse
     {
         public double AccelerationDeltaVelocity { get; set; }
         public double TurnDeltaAngle { get; set; }
     }
 
-    struct CarSensorReading
+    public struct CarSensorReading
     {
         public double LeftSensorDistanceToWall { get; set; }
         public double CenterSensorDistanceToWall { get; set; }
         public double RightSensorDistanceToWall { get; set; }
     }
 
-    class Car
+    public class Car
     {
+        private readonly Map map;
+
         public BoundingBox BoundingBox { get; }
 
         public double Velocity { get; private set; }
         public double Angle { get; private set; }
 
-        public Car(double width, double height)
+        public Line ForwardDirectionLine
         {
+            get
+            {
+                var line = new Line() {
+                    Start = BoundingBox.Center - new Point(0, 0.5),
+                    End = BoundingBox.Center + new Point(0, 0.5)
+                };
+
+                return line.Rotate(Angle);
+            }
+        }
+
+        public Car(
+            Map map,
+            double width,
+            double height)
+        {
+            this.map = map;
+
             BoundingBox = new BoundingBox()
             {
                 Size = new Size()
@@ -49,69 +69,13 @@ namespace MachineLearningPractice.Models
             Velocity += deltaVelocity;
         }
 
-        public CarSensorReading GetSensorReadings(Map map)
-        {
-            var mapLinesOrderedByProximity = map
-                .Nodes
-                .SelectMany(x => x.Lines)
-                .OrderBy(GetProximityToLine);
-
-            return new CarSensorReading()
-            {
-                LeftSensorDistanceToWall = GetSensorReading(mapLinesOrderedByProximity, -45),
-                CenterSensorDistanceToWall = GetSensorReading(mapLinesOrderedByProximity, 0),
-                RightSensorDistanceToWall = GetSensorReading(mapLinesOrderedByProximity, 45)
-            };
-        }
-
-        private double GetProximityToLine(Line line)
-        {
-            var carFrontLine = GetRotatedOnePixelLine(Angle);
-            var intersectionPoint = carFrontLine.GetIntersectionPointWith(line);
-            if(intersectionPoint == null)
-                return double.MaxValue;
-
-            return intersectionPoint.GetDistanceTo(BoundingBox.Center);
-        }
-
         public void Tick()
         {
-            var directionalVector = GetRotatedOnePixelLine(Angle);
+            var directionalVector = ForwardDirectionLine;
 
-            BoundingBox.Location.X += directionalVector.End.X * Velocity;
-            BoundingBox.Location.Y += directionalVector.End.Y * Velocity;
-        }
-
-        private double GetSensorReading(IEnumerable<Line> linesOrderedByProximity, double angleInDegrees)
-        {
-            var sensorLine = GetRotatedOnePixelLine(angleInDegrees);
-
-            foreach (var line in linesOrderedByProximity)
-            {
-                var intersectionPoint = sensorLine.GetIntersectionPointWith(line);
-                if (intersectionPoint == null)
-                    continue;
-
-                var distance = BoundingBox.Center.GetDistanceTo(intersectionPoint);
-                return distance;
-            }
-
-            throw new InvalidOperationException("Did not find any intersection points.");
-        }
-
-        private Line GetRotatedOnePixelLine(double angleInDegrees)
-        {
-            var sensorLine = new Line()
-            {
-                Start = new Point(0, 0),
-                End = new Point(0, 1)
-            };
-
-            sensorLine.End = sensorLine.End.RotateAround(
-                sensorLine.Start,
-                angleInDegrees + Angle);
-
-            return sensorLine;
+            BoundingBox.Location = new Point(
+                BoundingBox.Location.X + (directionalVector.End.X * Velocity),
+                BoundingBox.Location.Y + (directionalVector.End.Y * Velocity));
         }
     }
 }

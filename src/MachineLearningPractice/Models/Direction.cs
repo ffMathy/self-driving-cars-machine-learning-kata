@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MachineLearningPractice.Models
 {
-    enum Direction
+    public enum Direction
     {
         Top,
         Left,

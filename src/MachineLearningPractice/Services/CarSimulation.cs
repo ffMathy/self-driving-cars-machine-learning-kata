@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MachineLearningPractice.Services
 {
-    class CarSimulation
+    public class CarSimulation
     {
         private readonly Car car;
         private readonly Random random;
@@ -17,6 +17,8 @@ namespace MachineLearningPractice.Services
         private readonly List<CarSimulationTick> pendingTrainingInstructions;
 
         private readonly double randomnessFactor;
+
+        private CarSensorReading? sensorReadingCached;
 
         private ulong ticksSurvived;
 
@@ -33,6 +35,7 @@ namespace MachineLearningPractice.Services
             this.ticksSurvived = 0;
 
             this.car = new Car(
+                map,
                 Map.TileSize / 5,
                 Map.TileSize / 3);
 
@@ -44,15 +47,31 @@ namespace MachineLearningPractice.Services
             this.randomnessFactor = randomnessFactor;
         }
 
+        public CarSensorReading GetSensorReadings()
+        {
+            if(sensorReadingCached != null)
+                return sensorReadingCached.Value;
+
+            var mapLinesOrderedByProximity = map
+                .Nodes
+                .SelectMany(x => x.Lines)
+                .OrderBy(GetCarProximityToLine);
+
+            sensorReadingCached = new CarSensorReading()
+            {
+                LeftSensorDistanceToWall = GetSensorReading(mapLinesOrderedByProximity, -45),
+                CenterSensorDistanceToWall = GetSensorReading(mapLinesOrderedByProximity, 0),
+                RightSensorDistanceToWall = GetSensorReading(mapLinesOrderedByProximity, 45)
+            };
+
+            return sensorReadingCached.Value;
+        }
+
         public bool Tick()
         {
-            var sensorReading = car.GetSensorReadings(map);
+            sensorReadingCached = GetSensorReadings();
 
-            var delta = 0.0001;
-            if (sensorReading.CenterSensorDistanceToWall < delta || sensorReading.LeftSensorDistanceToWall < delta || sensorReading.RightSensorDistanceToWall < delta)
-                return false;
-
-            var neuralNetCarResponse = this.carNeuralNetwork.Ask(sensorReading);
+            var neuralNetCarResponse = this.carNeuralNetwork.Ask(sensorReadingCached.Value);
 
             var adjustedCarResponse = new CarResponse()
             {
@@ -68,12 +87,38 @@ namespace MachineLearningPractice.Services
             pendingTrainingInstructions.Add(new CarSimulationTick()
             {
                 CarResponse = adjustedCarResponse,
-                CarSensorReading = sensorReading
+                CarSensorReading = sensorReadingCached.Value
             });
 
             ticksSurvived++;
 
             return true;
+        }
+
+        private double GetCarProximityToLine(Line line)
+        {
+            var intersectionPoint = car.ForwardDirectionLine.GetIntersectionPointWith(line);
+            if (intersectionPoint == null)
+                return double.MaxValue;
+
+            return intersectionPoint.Value.GetDistanceTo(car.BoundingBox.Center);
+        }
+
+        private double GetSensorReading(IEnumerable<Line> linesOrderedByProximity, double angleInDegrees)
+        {
+            var sensorLine = car.ForwardDirectionLine.Rotate(angleInDegrees);
+
+            foreach (var line in linesOrderedByProximity)
+            {
+                var intersectionPoint = sensorLine.GetIntersectionPointWith(line);
+                if (intersectionPoint == null)
+                    continue;
+
+                var distance = car.BoundingBox.Center.GetDistanceTo(intersectionPoint.Value);
+                return distance;
+            }
+
+            throw new InvalidOperationException("Did not find any intersection points.");
         }
 
         private double GetRandomnessFactor(double multiplier)

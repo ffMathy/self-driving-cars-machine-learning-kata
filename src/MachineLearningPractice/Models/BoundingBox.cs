@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MachineLearningPractice.Models
 {
-    class BoundingBox
+    public class BoundingBox
     {
         public Size Size { get; set; }
 

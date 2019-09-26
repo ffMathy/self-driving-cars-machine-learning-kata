@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MachineLearningPractice.Models
 {
-    class Map
+    public class Map
     {
         public const double TileSize = 100;
         public const double HalfTileSize = TileSize / 2;

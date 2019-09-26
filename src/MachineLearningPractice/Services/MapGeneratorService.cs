@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace MachineLearningPractice.Services
 {
-    class MapGeneratorService
+    public class MapGeneratorService
     {
         private readonly Random random;
         private readonly DirectionHelper directionHelper;

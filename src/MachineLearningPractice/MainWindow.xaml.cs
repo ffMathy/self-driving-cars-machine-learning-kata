@@ -71,7 +71,7 @@ namespace MachineLearningPractice
 
                 foreach (var simulation in simulations)
                 {
-                    RenderCar(simulation.Car);
+                    RenderCarSimulation(simulation);
 
                     if (!simulation.Tick())
                         hasCrashed = true;
@@ -108,8 +108,10 @@ namespace MachineLearningPractice
             }
         }
 
-        private void RenderCar(Car car)
+        private void RenderCarSimulation(CarSimulation carSimulation)
         {
+            var car = carSimulation.Car;
+
             var width = car.BoundingBox.Size.Width;
             var height = car.BoundingBox.Size.Height;
 
@@ -128,7 +130,7 @@ namespace MachineLearningPractice
             Canvas.SetLeft(rectangle, car.BoundingBox.Center.X - width / 2);
             Canvas.SetTop(rectangle, car.BoundingBox.Center.Y - height / 2);
 
-            var sensorReadings = car.GetSensorReadings(map);
+            var sensorReadings = carSimulation.GetSensorReadings();
             var sensorDistances = new[]
             {
                 sensorReadings.LeftSensorDistanceToWall,

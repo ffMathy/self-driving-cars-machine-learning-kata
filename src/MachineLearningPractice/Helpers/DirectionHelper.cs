@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MachineLearningPractice.Helpers
 {
-    class DirectionHelper
+    public class DirectionHelper
     {
         private readonly Random random;
 

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MachineLearningPractice.Models
 {
-    class MapNode
+    public class MapNode
     {
         public Direction EntranceDirection { get; set; }
         public Direction ExitDirection { get; set; }
