@@ -36,8 +36,8 @@ namespace MachineLearningPractice.Models
             get
             {
                 var line = new Line() {
-                    Start = BoundingBox.Center - new Point(0, 0.5),
-                    End = BoundingBox.Center + new Point(0, 0.5)
+                    Start = BoundingBox.Center - new Point(0, BoundingBox.Size.Width / 2),
+                    End = BoundingBox.Center + new Point(0, BoundingBox.Size.Width / 2)
                 };
 
                 return line.Rotate(TurnAngle);

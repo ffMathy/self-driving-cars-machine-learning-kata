@@ -152,10 +152,10 @@ namespace MachineLearningPractice
 
             var line = new System.Windows.Shapes.Line()
             {
-                X1 = car.BoundingBox.Center.X,
-                Y1 = car.BoundingBox.Center.Y,
-                X2 = car.BoundingBox.Center.X + (car.ForwardDirectionLine.End.X * car.BoundingBox.Size.Width),
-                Y2 = car.BoundingBox.Center.Y + (car.ForwardDirectionLine.End.Y * car.BoundingBox.Size.Height),
+                X1 = car.ForwardDirectionLine.Start.X,
+                Y1 = car.ForwardDirectionLine.Start.Y,
+                X2 = car.ForwardDirectionLine.End.X,
+                Y2 = car.ForwardDirectionLine.End.Y,
                 Stroke = Brushes.Blue,
                 StrokeThickness = 1
             };
