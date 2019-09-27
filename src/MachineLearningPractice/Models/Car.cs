@@ -22,8 +22,6 @@ namespace MachineLearningPractice.Models
 
     public class Car
     {
-        private readonly Map map;
-
         public BoundingBox BoundingBox { get; }
 
         public double SpeedVelocity { get; private set; }
@@ -36,8 +34,8 @@ namespace MachineLearningPractice.Models
             get
             {
                 var line = new Line() {
-                    Start = BoundingBox.Center - new Point(0, BoundingBox.Size.Width / 2),
-                    End = BoundingBox.Center + new Point(0, BoundingBox.Size.Width / 2)
+                    Start = new Point(0, -0.5),
+                    End = new Point(0, 0.5)
                 };
 
                 return line.Rotate(TurnAngle);
@@ -45,12 +43,9 @@ namespace MachineLearningPractice.Models
         }
 
         public Car(
-            Map map,
             double width,
             double height)
         {
-            this.map = map;
-
             BoundingBox = new BoundingBox()
             {
                 Size = new Size()
@@ -75,13 +70,11 @@ namespace MachineLearningPractice.Models
 
         public void Tick()
         {
-            var directionalVector = ForwardDirectionLine;
-
             TurnAngle += TurnAngleVelocity;
 
             BoundingBox.Location = new Point(
-                BoundingBox.Location.X + (directionalVector.End.X * SpeedVelocity),
-                BoundingBox.Location.Y + (directionalVector.End.Y * SpeedVelocity));
+                BoundingBox.Location.X - (ForwardDirectionLine.End.X * SpeedVelocity),
+                BoundingBox.Location.Y - (ForwardDirectionLine.End.Y * SpeedVelocity));
         }
     }
 }

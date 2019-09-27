@@ -22,7 +22,16 @@ namespace MachineLearningPractice.Services
 
         public Map PickRandomPredefinedMap()
         {
-            var maps = new List<MapNode[]>();
+            return CreateMapBuilder()
+                .MoveInDirection(Direction.Top)
+                .MoveInDirection(Direction.Left)
+                .MoveInDirection(Direction.Bottom)
+                .MoveInDirection(Direction.Bottom)
+                .MoveInDirection(Direction.Right)
+                .MoveInDirection(Direction.Top)
+                .Build();
+
+            var maps = new List<Map>();
 
             maps.Add(CreateMapBuilder()
                 .MoveInDirection(Direction.Top)
@@ -60,12 +69,7 @@ namespace MachineLearningPractice.Services
                 .Build());
 
             var index = random.Next(0, maps.Count);
-            var nodes = maps[index];
-
-            return new Map()
-            {
-                Nodes = nodes
-            };
+            return maps[index];
         }
 
         private MapBuilder CreateMapBuilder()
@@ -109,9 +113,7 @@ namespace MachineLearningPractice.Services
                         if (directions.Count == 4)
                             break;
 
-                        return new Map() {
-                            Nodes = mapBuilder.Build()
-                        };
+                        return mapBuilder.Build();
                     }
                 }
             }

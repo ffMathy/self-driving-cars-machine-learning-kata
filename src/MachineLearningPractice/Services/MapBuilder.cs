@@ -46,9 +46,11 @@ namespace MachineLearningPractice.Services
             return this;
         }
 
-        public MapNode[] Build()
+        public Map Build()
         {
-            return nodes.ToArray();
+            return new Map() {
+                Nodes = nodes.ToArray()
+            };
         }
 
         private MapNode GenerateMapSegmentNode(

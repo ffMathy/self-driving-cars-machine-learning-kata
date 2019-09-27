@@ -24,6 +24,8 @@ namespace MachineLearningPractice.Services
 
         public Car Car => car;
 
+        public ulong TicksSurvived => ticksSurvived;
+
         public IReadOnlyList<CarSimulationTick> PendingTrainingInstructions => pendingTrainingInstructions;
 
         public CarSimulation(
@@ -35,7 +37,6 @@ namespace MachineLearningPractice.Services
             this.ticksSurvived = 0;
 
             this.car = new Car(
-                map,
                 Map.TileSize / 2,
                 Map.TileSize / 2);
 
