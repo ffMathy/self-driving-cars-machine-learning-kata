@@ -7,13 +7,25 @@ namespace MachineLearningPractice.Tests.Models
     public class PointTest
     {
         [TestMethod]
-        public void RotatePointWorks()
+        public void RotatePointAroundZeroCenterWorks()
         {
             var point = new Point(-1, -1);
             var centerPoint = new Point(0, 0);
             var rotatedPoint = point.RotateAround(centerPoint, 90);
 
             var delta = new Point(1, -1) - rotatedPoint;
+            Assert.IsTrue(delta.X < 0.001);
+            Assert.IsTrue(delta.Y < 0.001);
+        }
+
+        [TestMethod]
+        public void RotatePointAroundComplexCenterWorks()
+        {
+            var point = new Point(-1, -2);
+            var centerPoint = new Point(0, -1);
+            var rotatedPoint = point.RotateAround(centerPoint, 90);
+
+            var delta = new Point(1, -2) - rotatedPoint;
             Assert.IsTrue(delta.X < 0.001);
             Assert.IsTrue(delta.Y < 0.001);
         }

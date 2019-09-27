@@ -7,6 +7,20 @@ namespace MachineLearningPractice.Tests.Models
     public class LineTest
     {
         [TestMethod]
+        public void ZeroCenterWorks()
+        {
+            var line = new Line()
+            {
+                Start = new Point(-1, -1),
+                End = new Point(1, 1)
+            };
+
+            Assert.AreEqual(
+                new Point(0, 0),
+                line.Center);
+        }
+
+        [TestMethod]
         public void GetIntersectionPointWorks()
         {
             var line1 = new Line() {
@@ -29,28 +43,31 @@ namespace MachineLearningPractice.Tests.Models
         [TestMethod]
         public void RotateAroundZeroCenterWorks()
         {
-            //TODO: make more tests that try to rotate along a different center point - perhaps with a car involved? perhaps even a car test?
-
             var line = new Line() {
                 Start = new Point(-1, -1),
                 End = new Point(1, 1)
             };
 
-            var rotatedLine = line.Rotate(-45);
+            var rotatedLine = line.Rotate(90);
 
-            Assert.AreEqual(
-                new Line() {
-                    Start = new Point(0, -1),
-                    End = new Point(0, 1)
-                },
-                rotatedLine);
+            var destinationLine = new Line()
+            {
+                Start = new Point(1, -1),
+                End = new Point(-1, 1)
+            };
+
+            var deltaStart = destinationLine.Start - rotatedLine.Start;
+            Assert.IsTrue(deltaStart.X < 0.001);
+            Assert.IsTrue(deltaStart.Y < 0.001);
+
+            var deltaEnd = destinationLine.End - rotatedLine.End;
+            Assert.IsTrue(deltaEnd.X < 0.001);
+            Assert.IsTrue(deltaEnd.Y < 0.001);
         }
 
         [TestMethod]
         public void RotateAroundComplexCenterWorks()
         {
-            //TODO: make more tests that try to rotate along a different center point - perhaps with a car involved? perhaps even a car test?
-
             var line = new Line()
             {
                 Start = new Point(-2, -4),

@@ -20,8 +20,8 @@ namespace MachineLearningPractice.Models
         public Point End { get; set; }
 
         public Point Center => new Point(
-            End.X - Start.X,
-            End.Y - Start.Y);
+            Start.X + (End.X - Start.X) / 2,
+            Start.Y + (End.Y - Start.Y) / 2);
 
         public LineFormula Formula
         {
