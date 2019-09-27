@@ -7,18 +7,6 @@ using System.Threading.Tasks;
 
 namespace MachineLearningPractice.Models
 {
-    public struct CarResponse
-    {
-        public double AccelerationDeltaVelocity { get; set; }
-        public double TurnDeltaAngle { get; set; }
-    }
-
-    public struct CarSensorReading
-    {
-        public double LeftSensorDistanceToWall { get; set; }
-        public double CenterSensorDistanceToWall { get; set; }
-        public double RightSensorDistanceToWall { get; set; }
-    }
 
     public class Car
     {
@@ -33,7 +21,8 @@ namespace MachineLearningPractice.Models
         {
             get
             {
-                var line = new Line() {
+                var line = new Line()
+                {
                     Start = new Point(0, -0.5),
                     End = new Point(0, 0.5)
                 };

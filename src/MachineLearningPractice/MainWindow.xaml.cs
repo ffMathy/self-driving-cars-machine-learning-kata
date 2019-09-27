@@ -77,7 +77,7 @@ namespace MachineLearningPractice
                         hasCrashed = true;
                 }
 
-                await Task.Delay(50);
+                await Task.Delay(300);
             }
 
             MessageBox.Show("Crashed!");
@@ -126,16 +126,23 @@ namespace MachineLearningPractice
             Canvas.SetLeft(ellipse, car.BoundingBox.Location.X);
             Canvas.SetTop(ellipse, car.BoundingBox.Location.Y);
 
+            RenderCarSimulationSensorReadings(carSimulation);
+        }
+
+        private void RenderCarSimulationSensorReadings(CarSimulation carSimulation)
+        {
+            var car = carSimulation.Car;
+
             var sensorReadings = carSimulation.GetSensorReadings();
             var sensorDistances = new[]
             {
-                sensorReadings.LeftSensorDistanceToWall,
-                sensorReadings.CenterSensorDistanceToWall,
-                sensorReadings.RightSensorDistanceToWall
+                sensorReadings.LeftSensor,
+                sensorReadings.CenterSensor,
+                sensorReadings.RightSensor
             };
 
             var sensorLabels = sensorDistances
-                .Select(x => Math.Round(x))
+                .Select(x => Math.Round(x.Distance))
                 .Select(x => x.ToString());
 
             var label = new TextBlock()
@@ -160,6 +167,16 @@ namespace MachineLearningPractice
                 StrokeThickness = 1
             };
             MapCanvas.Children.Add(line);
+
+            var sensorLine = new System.Windows.Shapes.Line()
+            {
+                X1 = car.BoundingBox.Center.X,
+                Y1 = car.BoundingBox.Center.Y,
+                X2 = car.BoundingBox.Center.X + car.ForwardDirectionLine.End.X * car.BoundingBox.Size.Width,
+                Y2 = car.BoundingBox.Center.Y + car.ForwardDirectionLine.End.Y * car.BoundingBox.Size.Height,
+                Stroke = Brushes.Blue,
+                StrokeThickness = 1
+            };
         }
 
         private void RenderMapNode(MapNode node)

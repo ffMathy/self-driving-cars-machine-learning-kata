@@ -24,6 +24,13 @@ namespace MachineLearningPractice.Services
         {
             return CreateMapBuilder()
                 .MoveInDirection(Direction.Top)
+                .MoveInDirection(Direction.Top)
+                .MoveInDirection(Direction.Top)
+                .MoveInDirection(Direction.Top)
+                .Build();
+
+            return CreateMapBuilder()
+                .MoveInDirection(Direction.Top)
                 .MoveInDirection(Direction.Left)
                 .MoveInDirection(Direction.Bottom)
                 .MoveInDirection(Direction.Bottom)

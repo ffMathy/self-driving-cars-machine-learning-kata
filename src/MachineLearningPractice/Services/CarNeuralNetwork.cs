@@ -13,7 +13,7 @@ namespace MachineLearningPractice.Services
 {
     public struct CarSimulationTick
     {
-        public CarSensorReading CarSensorReading { get; set; }
+        public CarSensorReadingSnapshot CarSensorReading { get; set; }
         public CarResponse CarResponse { get; set; }
     }
 
@@ -32,7 +32,7 @@ namespace MachineLearningPractice.Services
         }
 
         public void Record(
-            CarSensorReading sensorReading,
+            CarSensorReadingSnapshot sensorReading,
             CarResponse carResponse)
         {
             trainingInstructions.Add(new CarSimulationTick()
@@ -62,7 +62,7 @@ namespace MachineLearningPractice.Services
         }
 
         public CarResponse Ask(
-            CarSensorReading sensorReading)
+            CarSensorReadingSnapshot sensorReading)
         {
             if(this.regression == null)
                 return new CarResponse();
@@ -76,12 +76,12 @@ namespace MachineLearningPractice.Services
             };
         }
 
-        private static double[] GetNeuralInputFromSensorReading(CarSensorReading sensorReading)
+        private static double[] GetNeuralInputFromSensorReading(CarSensorReadingSnapshot sensorReading)
         {
             return new[] {
-                sensorReading.CenterSensorDistanceToWall,
-                sensorReading.LeftSensorDistanceToWall,
-                sensorReading.RightSensorDistanceToWall
+                sensorReading.CenterSensor.Distance,
+                sensorReading.LeftSensor.Distance,
+                sensorReading.RightSensor.Distance
             };
         }
     }

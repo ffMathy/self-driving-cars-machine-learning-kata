@@ -7,6 +7,25 @@ using System.Threading.Tasks;
 
 namespace MachineLearningPractice.Services
 {
+    public struct CarResponse
+    {
+        public double AccelerationDeltaVelocity { get; set; }
+        public double TurnDeltaAngle { get; set; }
+    }
+
+    public struct CarSensorReadingSnapshot
+    {
+        public CarSensorReading LeftSensor { get; set; }
+        public CarSensorReading CenterSensor { get; set; }
+        public CarSensorReading RightSensor { get; set; }
+    }
+
+    public struct CarSensorReading
+    {
+        public Point IntersectionPoint { get; set; }
+        public double Distance { get; set; }
+    }
+
     public class CarSimulation
     {
         private readonly Car car;
@@ -18,7 +37,7 @@ namespace MachineLearningPractice.Services
 
         private readonly double randomnessFactor;
 
-        private CarSensorReading? sensorReadingCached;
+        private CarSensorReadingSnapshot? sensorReadingCached;
 
         private ulong ticksSurvived;
 
@@ -48,7 +67,7 @@ namespace MachineLearningPractice.Services
             this.randomnessFactor = randomnessFactor;
         }
 
-        public CarSensorReading GetSensorReadings()
+        public CarSensorReadingSnapshot GetSensorReadings()
         {
             if(sensorReadingCached != null)
                 return sensorReadingCached.Value;
@@ -58,11 +77,11 @@ namespace MachineLearningPractice.Services
                 .SelectMany(x => x.Lines)
                 .OrderBy(GetCarProximityToLine);
 
-            sensorReadingCached = new CarSensorReading()
+            sensorReadingCached = new CarSensorReadingSnapshot()
             {
-                LeftSensorDistanceToWall = GetSensorReading(mapLinesOrderedByProximity, -45),
-                CenterSensorDistanceToWall = GetSensorReading(mapLinesOrderedByProximity, 0),
-                RightSensorDistanceToWall = GetSensorReading(mapLinesOrderedByProximity, 45)
+                LeftSensor = GetSensorReading(mapLinesOrderedByProximity, -45),
+                CenterSensor = GetSensorReading(mapLinesOrderedByProximity, 0),
+                RightSensor = GetSensorReading(mapLinesOrderedByProximity, 45)
             };
 
             return sensorReadingCached.Value;
@@ -106,7 +125,7 @@ namespace MachineLearningPractice.Services
             return intersectionPoint.Value.GetDistanceTo(car.BoundingBox.Center);
         }
 
-        private double GetSensorReading(IEnumerable<Line> linesOrderedByProximity, double angleInDegrees)
+        private CarSensorReading GetSensorReading(IEnumerable<Line> linesOrderedByProximity, double angleInDegrees)
         {
             var sensorLine = car.ForwardDirectionLine.Rotate(angleInDegrees);
 
@@ -117,10 +136,14 @@ namespace MachineLearningPractice.Services
                     continue;
 
                 var distance = car.BoundingBox.Center.GetDistanceTo(intersectionPoint.Value);
-                return distance;
+                return new CarSensorReading()
+                {
+                    IntersectionPoint = intersectionPoint.Value,
+                    Distance = distance
+                };
             }
 
-            throw new InvalidOperationException("Did not find any intersection points.");
+            throw new InvalidOperationException("Could not find an intersection point.");
         }
 
         private double GetRandomnessFactor(double multiplier)
