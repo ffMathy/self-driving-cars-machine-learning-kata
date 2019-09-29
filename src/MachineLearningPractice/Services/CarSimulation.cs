@@ -40,11 +40,15 @@ namespace MachineLearningPractice.Services
 
         private ulong ticksSurvived;
 
+        private bool isCrashed;
+
         public ulong TicksSurvived => ticksSurvived;
 
         public Car Car => car;
 
         public IReadOnlyList<CarSimulationTick> PendingTrainingInstructions => pendingTrainingInstructions;
+
+        public bool IsCrashed => isCrashed;
 
         public CarSimulation(
             Random random,
@@ -66,6 +70,9 @@ namespace MachineLearningPractice.Services
 
         public bool Tick()
         {
+            if(isCrashed)
+                return false;
+
             var sensorReadings = GetSensorReadings();
             var neuralNetCarResponse = this.carNeuralNetwork.Ask(sensorReadings);
 
@@ -85,8 +92,10 @@ namespace MachineLearningPractice.Services
             car.Tick();
 
             var distanceToClosestIntersectionPoint = GetDistanceToClosestIntersectionPoint();
-            if(distanceToClosestIntersectionPoint < Car.Size / 3)
+            if(distanceToClosestIntersectionPoint < Car.Size / 3) {
+                isCrashed = true;
                 return false;
+            }
 
             pendingTrainingInstructions.Add(new CarSimulationTick()
             {

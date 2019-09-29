@@ -29,6 +29,8 @@ namespace MachineLearningPractice
 
         private Map map;
 
+        private CarSimulation bestSimulationInGeneration;
+
         public MainWindow()
         {
             this.random = new Random();
@@ -51,7 +53,7 @@ namespace MachineLearningPractice
 
         private async Task TrainGeneration()
         {
-            const int simulationCount = 1;
+            const int simulationCount = 10;
 
             var simulations = new List<CarSimulation>();
             for (var i = 0; i < simulationCount; i++)
@@ -63,8 +65,8 @@ namespace MachineLearningPractice
                     0.1));
             }
 
-            var hasCrashed = false;
-            while (!hasCrashed)
+            var crashedCount = 0;
+            while (crashedCount < simulations.Count)
             {
                 ClearCanvas();
                 RenderMap();
@@ -73,11 +75,14 @@ namespace MachineLearningPractice
                 {
                     RenderCarSimulation(simulation);
 
+                    if (simulation.IsCrashed)
+                        continue;
+
                     if (!simulation.Tick())
-                        hasCrashed = true;
+                        crashedCount++;
                 }
 
-                await Task.Delay(300);
+                await Task.Delay(100);
             }
 
             MessageBox.Show("Crashed!");
@@ -189,7 +194,7 @@ namespace MachineLearningPractice
                     X2 = sensorReading.Value.IntersectionPoint.X,
                     Y2 = sensorReading.Value.IntersectionPoint.Y,
                     Stroke = Brushes.Blue,
-                    Opacity = 0.5,
+                    Opacity = 0.1,
                     StrokeThickness = 1
                 };
 
