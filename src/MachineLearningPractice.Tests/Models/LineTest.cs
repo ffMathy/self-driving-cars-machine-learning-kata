@@ -21,6 +21,26 @@ namespace MachineLearningPractice.Tests.Models
         }
 
         [TestMethod]
+        public void GetAngleBetweenWorks()
+        {
+            var line1 = new Line()
+            {
+                Start = new Point(-1, -1),
+                End = new Point(1, 1)
+            };
+
+            var line2 = new Line()
+            {
+                Start = new Point(-1, 1),
+                End = new Point(1, -1)
+            };
+
+            Assert.AreEqual(
+                90,
+                line1.GetAngleTo(line2));
+        }
+
+        [TestMethod]
         public void GetIntersectionPointWorks()
         {
             var line1 = new Line() {

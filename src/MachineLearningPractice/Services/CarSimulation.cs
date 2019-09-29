@@ -1,4 +1,5 @@
-﻿using MachineLearningPractice.Models;
+﻿using MachineLearningPractice.Helpers;
+using MachineLearningPractice.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +16,9 @@ namespace MachineLearningPractice.Services
 
     public struct CarSensorReadingSnapshot
     {
-        public CarSensorReading LeftSensor { get; set; }
-        public CarSensorReading CenterSensor { get; set; }
-        public CarSensorReading RightSensor { get; set; }
+        public CarSensorReading? LeftSensor { get; set; }
+        public CarSensorReading? CenterSensor { get; set; }
+        public CarSensorReading? RightSensor { get; set; }
     }
 
     public struct CarSensorReading
@@ -36,8 +37,6 @@ namespace MachineLearningPractice.Services
         private readonly List<CarSimulationTick> pendingTrainingInstructions;
 
         private readonly double randomnessFactor;
-
-        private CarSensorReadingSnapshot? sensorReadingCached;
 
         private ulong ticksSurvived;
 
@@ -67,28 +66,23 @@ namespace MachineLearningPractice.Services
 
         public CarSensorReadingSnapshot GetSensorReadings()
         {
-            if (sensorReadingCached != null)
-                return sensorReadingCached.Value;
-
             var mapLinesOrderedByProximity = map
                 .Nodes
                 .SelectMany(x => x.Lines)
                 .OrderBy(GetCarProximityToLine);
 
-            sensorReadingCached = new CarSensorReadingSnapshot()
+            var sensorReadingCached = new CarSensorReadingSnapshot()
             {
                 LeftSensor = GetSensorReading(mapLinesOrderedByProximity, -360 / 8),
                 CenterSensor = GetSensorReading(mapLinesOrderedByProximity, 0),
                 RightSensor = GetSensorReading(mapLinesOrderedByProximity, 360 / 8)
             };
 
-            return sensorReadingCached.Value;
+            return sensorReadingCached;
         }
 
         public bool Tick()
         {
-            sensorReadingCached = null;
-
             var sensorReadings = GetSensorReadings();
             var neuralNetCarResponse = this.carNeuralNetwork.Ask(sensorReadings);
 
@@ -120,19 +114,14 @@ namespace MachineLearningPractice.Services
 
         private double GetCarProximityToLine(Line line)
         {
-            var intersectionPoint = GetIntersectionPoint(line);
+            var intersectionPoint = car.ForwardDirectionLine.GetIntersectionPointWith(line);
             if (intersectionPoint == null)
                 return double.MaxValue;
 
             return intersectionPoint.Value.GetDistanceTo(car.BoundingBox.Center);
         }
 
-        private Point? GetIntersectionPoint(Line line)
-        {
-            return car.ForwardDirectionLine.GetIntersectionPointWith(line);
-        }
-
-        private CarSensorReading GetSensorReading(
+        private CarSensorReading? GetSensorReading(
             IEnumerable<Line> linesOrderedByProximity,
             double angleInDegrees)
         {
@@ -146,10 +135,10 @@ namespace MachineLearningPractice.Services
                     continue;
 
                 var intersectionPoint = intersectionPointNullable.Value;
-                if (IsIntersectionPointOutsideLineBoundaries(line, intersectionPoint))
+                if (DirectionHelper.IsPointOutsideLineBoundaries(line, intersectionPoint))
                     continue;
 
-                if (!IsIntersectionPointInDirectionOfSensorLine(sensorLine, intersectionPoint))
+                if (!DirectionHelper.IsPointInDirectionOfSensorLine(sensorLine, intersectionPoint))
                     continue;
 
                 var distance = car.BoundingBox.Center.GetDistanceTo(intersectionPoint);
@@ -161,62 +150,11 @@ namespace MachineLearningPractice.Services
             }
 
             if (carSensorReadings.Count == 0)
-                throw new InvalidOperationException("Could not find an intersection point.");
+                return null;
 
             return carSensorReadings
                 .OrderBy(x => x.Distance)
                 .First();
-        }
-
-        private static bool IsIntersectionPointInDirectionOfSensorLine(Line sensorLine, Point intersectionPoint)
-        {
-            var lineX = sensorLine.End.X;
-            var lineY = sensorLine.End.Y;
-
-            var isValid = true;
-
-            if(lineX > 0 && intersectionPoint.X < 0)
-                isValid = false;
-
-            if(lineX < 0 && intersectionPoint.X > 0)
-                isValid = false;
-
-            if(lineY > 0 && intersectionPoint.Y < 0)
-                isValid = false;
-
-            if(lineY < 0 && intersectionPoint.Y > 0)
-                isValid = false;
-
-            return isValid;
-        }
-
-        private static bool IsIntersectionPointOutsideLineBoundaries(Line line, Point intersectionPoint)
-        {
-            var lowestLineX = Math.Min(
-                line.Start.X,
-                line.End.X);
-
-            var lowestLineY = Math.Min(
-                line.Start.Y,
-                line.End.Y);
-
-            var largestLineX = Math.Max(
-                line.Start.X,
-                line.End.X);
-
-            var largestLineY = Math.Max(
-                line.Start.Y,
-                line.End.Y);
-
-            const int minimumDelta = 1;
-
-            var isIntersectionOutsideLineBoundaries =
-                intersectionPoint.X - lowestLineX < -minimumDelta ||
-                intersectionPoint.Y - lowestLineY < -minimumDelta ||
-                intersectionPoint.X - largestLineX > minimumDelta ||
-                intersectionPoint.Y - largestLineY > minimumDelta;
-
-            return isIntersectionOutsideLineBoundaries;
         }
 
         private double GetRandomnessFactor(double multiplier)

@@ -79,19 +79,18 @@ namespace MachineLearningPractice.Services
             return maps[index];
         }
 
-        private MapBuilder CreateMapBuilder()
+        private static MapBuilder CreateMapBuilder()
         {
-            return new MapBuilder(directionHelper);
+            return new MapBuilder();
         }
 
         public Map GenerateRandomMap()
         {
             while (true)
             {
-                var mapBuilder = new MapBuilder(directionHelper);
+                var mapBuilder = CreateMapBuilder();
                 var directions = new List<Direction>();
 
-                var currentPoint = new Point();
                 var seenPoints = new HashSet<Point>();
 
                 var repeatedFailureCount = 0;
@@ -102,14 +101,14 @@ namespace MachineLearningPractice.Services
                     var previousDirection = currentDirection;
                     var newDirection = directionHelper.GetRandomDirectionOtherThan(
                         previousDirection,
-                        directionHelper.GetOppositeDirection(
+                        DirectionHelper.GetOppositeDirection(
                             previousDirection));
 
                     mapBuilder.MoveInDirection(newDirection);
 
                     repeatedFailureCount = 0;
 
-                    currentPoint = mapBuilder.CurrentPoint;
+                    var currentPoint = mapBuilder.CurrentPoint;
                     currentDirection = newDirection;
 
                     directions.Add(newDirection);

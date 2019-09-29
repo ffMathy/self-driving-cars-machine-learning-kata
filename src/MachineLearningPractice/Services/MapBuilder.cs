@@ -12,29 +12,26 @@ namespace MachineLearningPractice.Services
     public class MapBuilder
     {
         private readonly List<MapNode> nodes;
-        private readonly DirectionHelper directionHelper;
 
         private Point origin;
         private Direction previousDirection;
 
         public Point CurrentPoint => origin;
 
-        public MapBuilder(DirectionHelper directionHelper)
+        public MapBuilder()
         {
             this.nodes = new List<MapNode>();
-
             this.origin = new Point(0, 0);
-            this.directionHelper = directionHelper;
         }
 
         public MapBuilder MoveInDirection(Direction direction)
         {
             var node = GenerateMapSegmentNode(
                 origin,
-                directionHelper.GetOppositeDirection(previousDirection),
+                DirectionHelper.GetOppositeDirection(previousDirection),
                 direction);
 
-            var offset = directionHelper.GetDirectionalOffset(direction);
+            var offset = DirectionHelper.GetDirectionalOffset(direction);
             var newPoint = new Point(
                 origin.X + offset.X,
                 origin.Y + offset.Y);
@@ -53,7 +50,7 @@ namespace MachineLearningPractice.Services
             };
         }
 
-        private MapNode GenerateMapSegmentNode(
+        private static MapNode GenerateMapSegmentNode(
             Point origin,
             Direction entranceDirection,
             Direction exitDirection)

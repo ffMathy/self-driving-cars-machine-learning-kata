@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MachineLearningPractice.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -50,6 +51,27 @@ namespace MachineLearningPractice.Models
             };
         }
 
+        public double GetAngleTo(Line other)
+        {
+            var theta1 = Math.Atan2(
+                this.Start.Y - this.End.Y, 
+                this.Start.X - this.End.X);
+
+            var theta2 = Math.Atan2(
+                other.Start.Y - other.End.Y,
+                other.Start.X - other.End.X);
+
+            var difference = Math.Abs(theta1 - theta2);
+
+            var angleRadians = Math.Min(difference, Math.Abs(180 - difference));
+            var angleDegrees = MathHelper.RadiansToDegrees(angleRadians);
+
+            if(angleDegrees > 180)
+                angleDegrees = -(180 - angleDegrees);
+
+            return angleDegrees;
+        }
+
         public Point? GetIntersectionPointWith(Line other)
         {
             var delta = (this.Formula.A * other.Formula.B) - (other.Formula.A * this.Formula.B);
@@ -63,6 +85,23 @@ namespace MachineLearningPractice.Models
             };
 
             return point;
+        }
+
+        public static Line operator *(Line a, int b)
+        {
+            return new Line() {
+                Start = a.Start * b,
+                End = a.End * b
+            };
+        }
+
+        public static Line operator /(Line a, int b)
+        {
+            return new Line()
+            {
+                Start = a.Start / b,
+                End = a.End / b
+            };
         }
 
         public override string ToString() {

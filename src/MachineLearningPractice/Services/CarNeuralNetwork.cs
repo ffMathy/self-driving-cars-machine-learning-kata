@@ -79,9 +79,9 @@ namespace MachineLearningPractice.Services
         private static double[] GetNeuralInputFromSensorReading(CarSensorReadingSnapshot sensorReading)
         {
             return new[] {
-                sensorReading.CenterSensor.Distance,
-                sensorReading.LeftSensor.Distance,
-                sensorReading.RightSensor.Distance
+                sensorReading.CenterSensor?.Distance ?? 0,
+                sensorReading.LeftSensor?.Distance ?? 0,
+                sensorReading.RightSensor?.Distance ?? 0
             };
         }
     }

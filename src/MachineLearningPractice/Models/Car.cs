@@ -24,7 +24,7 @@ namespace MachineLearningPractice.Models
                 var line = new Line()
                 {
                     Start = new Point(0, -0.5),
-                    End = new Point(0, 0.5)
+                    End = new Point(0, 0)
                 };
 
                 return line.Rotate(TurnAngle);
@@ -41,6 +41,11 @@ namespace MachineLearningPractice.Models
                 {
                     Width = size,
                     Height = size
+                },
+                Location = new Point()
+                {
+                    X = -size / 2,
+                    Y = -size / 2
                 }
             };
         }
