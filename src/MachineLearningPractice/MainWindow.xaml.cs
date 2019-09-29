@@ -123,8 +123,8 @@ namespace MachineLearningPractice
             };
             MapCanvas.Children.Add(ellipse);
 
-            Canvas.SetLeft(ellipse, car.BoundingBox.Location.X);
-            Canvas.SetTop(ellipse, car.BoundingBox.Location.Y);
+            Canvas.SetLeft(ellipse, car.BoundingBox.Location.X - car.BoundingBox.Size.Width / 2);
+            Canvas.SetTop(ellipse, car.BoundingBox.Location.Y - car.BoundingBox.Size.Height / 2);
 
             RenderCarSimulationSensorReadings(carSimulation);
         }
@@ -134,16 +134,16 @@ namespace MachineLearningPractice
             var car = carSimulation.Car;
 
             var sensorReadings = carSimulation.GetSensorReadings();
-            var sensorDistances = new[]
+            var sensorReadingsArray = new[]
             {
                 sensorReadings.LeftSensor,
                 sensorReadings.CenterSensor,
                 sensorReadings.RightSensor
             };
 
-            var sensorLabels = sensorDistances
+            var sensorLabels = sensorReadingsArray
                 .Select(x => Math.Round(x.Distance))
-                .Select(x => x.ToString());
+                .Select(x => x + string.Empty);
 
             var label = new TextBlock()
             {
@@ -159,24 +159,36 @@ namespace MachineLearningPractice
 
             var line = new System.Windows.Shapes.Line()
             {
-                X1 = car.BoundingBox.Center.X,
-                Y1 = car.BoundingBox.Center.Y,
-                X2 = car.BoundingBox.Center.X + car.ForwardDirectionLine.End.X * car.BoundingBox.Size.Width,
-                Y2 = car.BoundingBox.Center.Y + car.ForwardDirectionLine.End.Y * car.BoundingBox.Size.Height,
+                X1 = car.BoundingBox.Location.X,
+                Y1 = car.BoundingBox.Location.Y,
+                X2 = car.BoundingBox.Location.X + (car.ForwardDirectionLine.End.X * car.BoundingBox.Size.Width),
+                Y2 = car.BoundingBox.Location.Y + (car.ForwardDirectionLine.End.Y * car.BoundingBox.Size.Height),
                 Stroke = Brushes.Blue,
-                StrokeThickness = 1
+                StrokeDashOffset = 2,
+                StrokeThickness = 3
             };
             MapCanvas.Children.Add(line);
 
-            var sensorLine = new System.Windows.Shapes.Line()
+            RenderCarSimulationSensorReadings(car, sensorReadingsArray);
+        }
+
+        private void RenderCarSimulationSensorReadings(Car car, CarSensorReading[] sensorReadingsArray)
+        {
+            foreach (var sensorReading in sensorReadingsArray)
             {
-                X1 = car.BoundingBox.Center.X,
-                Y1 = car.BoundingBox.Center.Y,
-                X2 = car.BoundingBox.Center.X + car.ForwardDirectionLine.End.X * car.BoundingBox.Size.Width,
-                Y2 = car.BoundingBox.Center.Y + car.ForwardDirectionLine.End.Y * car.BoundingBox.Size.Height,
-                Stroke = Brushes.Blue,
-                StrokeThickness = 1
-            };
+                var sensorLine = new System.Windows.Shapes.Line()
+                {
+                    X1 = car.BoundingBox.Location.X,
+                    Y1 = car.BoundingBox.Location.Y,
+                    X2 = sensorReading.IntersectionPoint.X,
+                    Y2 = sensorReading.IntersectionPoint.Y,
+                    Stroke = Brushes.Blue,
+                    Opacity = 0.5,
+                    StrokeThickness = 1
+                };
+
+                MapCanvas.Children.Add(sensorLine);
+            }
         }
 
         private void RenderMapNode(MapNode node)
@@ -207,7 +219,7 @@ namespace MachineLearningPractice
                 Y1 = line.Start.Y,
                 X2 = line.End.X,
                 Y2 = line.End.Y,
-                Stroke = Brushes.Black,
+                Stroke = Brushes.DarkGray,
                 StrokeThickness = 2
             });
         }

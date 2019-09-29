@@ -56,11 +56,13 @@ namespace MachineLearningPractice.Models
             if(delta == 0)
                 return null;
 
-            return new Point()
+            var point = new Point()
             {
                 X = ((other.Formula.B * this.Formula.C) - (this.Formula.B * other.Formula.C)) / delta,
                 Y = ((this.Formula.A * other.Formula.C) - (other.Formula.A * this.Formula.C)) / delta
             };
+
+            return point;
         }
 
         public override string ToString() {

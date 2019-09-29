@@ -55,9 +55,7 @@ namespace MachineLearningPractice.Services
         {
             this.ticksSurvived = 0;
 
-            this.car = new Car(
-                Map.TileSize / 2,
-                Map.TileSize / 2);
+            this.car = new Car();
 
             this.pendingTrainingInstructions = new List<CarSimulationTick>();
 
@@ -69,7 +67,7 @@ namespace MachineLearningPractice.Services
 
         public CarSensorReadingSnapshot GetSensorReadings()
         {
-            if(sensorReadingCached != null)
+            if (sensorReadingCached != null)
                 return sensorReadingCached.Value;
 
             var mapLinesOrderedByProximity = map
@@ -79,9 +77,9 @@ namespace MachineLearningPractice.Services
 
             sensorReadingCached = new CarSensorReadingSnapshot()
             {
-                LeftSensor = GetSensorReading(mapLinesOrderedByProximity, -45),
+                LeftSensor = GetSensorReading(mapLinesOrderedByProximity, -360 / 8),
                 CenterSensor = GetSensorReading(mapLinesOrderedByProximity, 0),
-                RightSensor = GetSensorReading(mapLinesOrderedByProximity, 45)
+                RightSensor = GetSensorReading(mapLinesOrderedByProximity, 360 / 8)
             };
 
             return sensorReadingCached.Value;
@@ -96,8 +94,12 @@ namespace MachineLearningPractice.Services
 
             var adjustedCarResponse = new CarResponse()
             {
-                AccelerationDeltaVelocity = neuralNetCarResponse.AccelerationDeltaVelocity + GetRandomnessFactor(1),
-                TurnDeltaAngle = neuralNetCarResponse.TurnDeltaAngle + GetRandomnessFactor(5)
+                AccelerationDeltaVelocity = 
+                    neuralNetCarResponse.AccelerationDeltaVelocity + 
+                    GetRandomnessFactor(10),
+                TurnDeltaAngle = 
+                    neuralNetCarResponse.TurnDeltaAngle + 
+                    GetRandomnessFactor(10)
             };
 
             car.Accelerate(adjustedCarResponse.AccelerationDeltaVelocity);
@@ -118,32 +120,103 @@ namespace MachineLearningPractice.Services
 
         private double GetCarProximityToLine(Line line)
         {
-            var intersectionPoint = car.ForwardDirectionLine.GetIntersectionPointWith(line);
+            var intersectionPoint = GetIntersectionPoint(line);
             if (intersectionPoint == null)
                 return double.MaxValue;
 
             return intersectionPoint.Value.GetDistanceTo(car.BoundingBox.Center);
         }
 
-        private CarSensorReading GetSensorReading(IEnumerable<Line> linesOrderedByProximity, double angleInDegrees)
+        private Point? GetIntersectionPoint(Line line)
+        {
+            return car.ForwardDirectionLine.GetIntersectionPointWith(line);
+        }
+
+        private CarSensorReading GetSensorReading(
+            IEnumerable<Line> linesOrderedByProximity,
+            double angleInDegrees)
         {
             var sensorLine = car.ForwardDirectionLine.Rotate(angleInDegrees);
 
+            var carSensorReadings = new HashSet<CarSensorReading>();
             foreach (var line in linesOrderedByProximity)
             {
-                var intersectionPoint = sensorLine.GetIntersectionPointWith(line);
-                if (intersectionPoint == null)
+                var intersectionPointNullable = sensorLine.GetIntersectionPointWith(line);
+                if (intersectionPointNullable == null)
                     continue;
 
-                var distance = car.BoundingBox.Center.GetDistanceTo(intersectionPoint.Value);
-                return new CarSensorReading()
+                var intersectionPoint = intersectionPointNullable.Value;
+                if (IsIntersectionPointOutsideLineBoundaries(line, intersectionPoint))
+                    continue;
+
+                if (!IsIntersectionPointInDirectionOfSensorLine(sensorLine, intersectionPoint))
+                    continue;
+
+                var distance = car.BoundingBox.Center.GetDistanceTo(intersectionPoint);
+                carSensorReadings.Add(new CarSensorReading()
                 {
-                    IntersectionPoint = intersectionPoint.Value,
+                    IntersectionPoint = intersectionPoint,
                     Distance = distance
-                };
+                });
             }
 
-            throw new InvalidOperationException("Could not find an intersection point.");
+            if (carSensorReadings.Count == 0)
+                throw new InvalidOperationException("Could not find an intersection point.");
+
+            return carSensorReadings
+                .OrderBy(x => x.Distance)
+                .First();
+        }
+
+        private static bool IsIntersectionPointInDirectionOfSensorLine(Line sensorLine, Point intersectionPoint)
+        {
+            var lineX = sensorLine.End.X;
+            var lineY = sensorLine.End.Y;
+
+            var isValid = true;
+
+            if(lineX > 0 && intersectionPoint.X < 0)
+                isValid = false;
+
+            if(lineX < 0 && intersectionPoint.X > 0)
+                isValid = false;
+
+            if(lineY > 0 && intersectionPoint.Y < 0)
+                isValid = false;
+
+            if(lineY < 0 && intersectionPoint.Y > 0)
+                isValid = false;
+
+            return isValid;
+        }
+
+        private static bool IsIntersectionPointOutsideLineBoundaries(Line line, Point intersectionPoint)
+        {
+            var lowestLineX = Math.Min(
+                line.Start.X,
+                line.End.X);
+
+            var lowestLineY = Math.Min(
+                line.Start.Y,
+                line.End.Y);
+
+            var largestLineX = Math.Max(
+                line.Start.X,
+                line.End.X);
+
+            var largestLineY = Math.Max(
+                line.Start.Y,
+                line.End.Y);
+
+            const int minimumDelta = 1;
+
+            var isIntersectionOutsideLineBoundaries =
+                intersectionPoint.X - lowestLineX < -minimumDelta ||
+                intersectionPoint.Y - lowestLineY < -minimumDelta ||
+                intersectionPoint.X - largestLineX > minimumDelta ||
+                intersectionPoint.Y - largestLineY > minimumDelta;
+
+            return isIntersectionOutsideLineBoundaries;
         }
 
         private double GetRandomnessFactor(double multiplier)

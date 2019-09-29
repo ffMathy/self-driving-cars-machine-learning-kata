@@ -23,6 +23,9 @@ namespace MachineLearningPractice.Models
 
         public Point RotateAround(Point centerPoint, double angleInDegrees)
         {
+            if(angleInDegrees == 0)
+                return new Point(X, Y);
+
             var pointToRotate = this;
 
             var angleInRadians = angleInDegrees * (Math.PI / 180);

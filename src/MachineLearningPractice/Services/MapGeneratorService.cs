@@ -22,21 +22,21 @@ namespace MachineLearningPractice.Services
 
         public Map PickRandomPredefinedMap()
         {
-            return CreateMapBuilder()
-                .MoveInDirection(Direction.Top)
-                .MoveInDirection(Direction.Top)
-                .MoveInDirection(Direction.Top)
-                .MoveInDirection(Direction.Top)
-                .Build();
+            //return CreateMapBuilder()
+            //    .MoveInDirection(Direction.Top)
+            //    .MoveInDirection(Direction.Top)
+            //    .MoveInDirection(Direction.Top)
+            //    .MoveInDirection(Direction.Top)
+            //    .Build();
 
-            return CreateMapBuilder()
-                .MoveInDirection(Direction.Top)
-                .MoveInDirection(Direction.Left)
-                .MoveInDirection(Direction.Bottom)
-                .MoveInDirection(Direction.Bottom)
-                .MoveInDirection(Direction.Right)
-                .MoveInDirection(Direction.Top)
-                .Build();
+            //return CreateMapBuilder()
+            //    .MoveInDirection(Direction.Top)
+            //    .MoveInDirection(Direction.Left)
+            //    .MoveInDirection(Direction.Bottom)
+            //    .MoveInDirection(Direction.Bottom)
+            //    .MoveInDirection(Direction.Right)
+            //    .MoveInDirection(Direction.Top)
+            //    .Build();
 
             var maps = new List<Map>();
 

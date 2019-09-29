@@ -31,16 +31,16 @@ namespace MachineLearningPractice.Models
             }
         }
 
-        public Car(
-            double width,
-            double height)
+        public Car()
         {
+            const int size = 20;
+
             BoundingBox = new BoundingBox()
             {
                 Size = new Size()
                 {
-                    Width = width,
-                    Height = height
+                    Width = size,
+                    Height = size
                 }
             };
         }
@@ -54,7 +54,7 @@ namespace MachineLearningPractice.Models
         public void Accelerate(double deltaVelocity)
         {
             SpeedVelocity += deltaVelocity;
-            SpeedVelocity = Math.Min(0.1, SpeedVelocity);
+            SpeedVelocity = Math.Min(10, SpeedVelocity);
         }
 
         public void Tick()
