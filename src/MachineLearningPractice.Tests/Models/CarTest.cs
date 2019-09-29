@@ -75,14 +75,14 @@ namespace MachineLearningPractice.Tests.Models
             Assert.IsNotNull(readings.CenterSensor);
             Assert.IsNotNull(readings.RightSensor);
 
-            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.LeftSensor.Value.IntersectionPoint.X, -50, 0.5));
-            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.LeftSensor.Value.IntersectionPoint.Y, -40, 0.5));
+            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.LeftSensor.Value.IntersectionPoint.X, -140, 0.5));
+            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.LeftSensor.Value.IntersectionPoint.Y, -150, 0.5));
 
             Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.CenterSensor.Value.IntersectionPoint.X, 0, 0.5));
             Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.CenterSensor.Value.IntersectionPoint.Y, -150, 0.5));
 
             Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.RightSensor.Value.IntersectionPoint.X, 50, 0.5));
-            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.RightSensor.Value.IntersectionPoint.Y, -40, 0.5));
+            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.RightSensor.Value.IntersectionPoint.Y, -60, 0.5));
         }
     }
 }

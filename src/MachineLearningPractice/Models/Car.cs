@@ -10,6 +10,8 @@ namespace MachineLearningPractice.Models
 
     public class Car
     {
+        public const int Size = 20;
+
         public BoundingBox BoundingBox { get; }
 
         public double SpeedVelocity { get; private set; }
@@ -33,7 +35,7 @@ namespace MachineLearningPractice.Models
 
         public Car()
         {
-            const int size = 20;
+            const int size = Size;
 
             BoundingBox = new BoundingBox()
             {

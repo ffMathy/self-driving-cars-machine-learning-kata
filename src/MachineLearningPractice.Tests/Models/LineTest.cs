@@ -36,7 +36,7 @@ namespace MachineLearningPractice.Tests.Models
             };
 
             Assert.AreEqual(
-                90,
+                270,
                 line1.GetAngleTo(line2));
         }
 

@@ -40,9 +40,9 @@ namespace MachineLearningPractice.Services
 
         private ulong ticksSurvived;
 
-        public Car Car => car;
-
         public ulong TicksSurvived => ticksSurvived;
+
+        public Car Car => car;
 
         public IReadOnlyList<CarSimulationTick> PendingTrainingInstructions => pendingTrainingInstructions;
 
@@ -62,23 +62,6 @@ namespace MachineLearningPractice.Services
             this.map = map;
             this.carNeuralNetwork = carNeuralNetwork;
             this.randomnessFactor = randomnessFactor;
-        }
-
-        public CarSensorReadingSnapshot GetSensorReadings()
-        {
-            var mapLinesOrderedByProximity = map
-                .Nodes
-                .SelectMany(x => x.Lines)
-                .OrderBy(GetCarProximityToLine);
-
-            var sensorReadingCached = new CarSensorReadingSnapshot()
-            {
-                LeftSensor = GetSensorReading(mapLinesOrderedByProximity, -360 / 8),
-                CenterSensor = GetSensorReading(mapLinesOrderedByProximity, 0),
-                RightSensor = GetSensorReading(mapLinesOrderedByProximity, 360 / 8)
-            };
-
-            return sensorReadingCached;
         }
 
         public bool Tick()
@@ -101,6 +84,10 @@ namespace MachineLearningPractice.Services
 
             car.Tick();
 
+            var distanceToClosestIntersectionPoint = GetDistanceToClosestIntersectionPoint();
+            if(distanceToClosestIntersectionPoint < Car.Size / 3)
+                return false;
+
             pendingTrainingInstructions.Add(new CarSimulationTick()
             {
                 CarResponse = adjustedCarResponse,
@@ -112,28 +99,44 @@ namespace MachineLearningPractice.Services
             return true;
         }
 
-        private double GetCarProximityToLine(Line line)
+        private double GetDistanceToClosestIntersectionPoint()
         {
-            var intersectionPoint = car.ForwardDirectionLine.GetIntersectionPointWith(line);
-            if (intersectionPoint == null)
-                return double.MaxValue;
+            return map.Nodes
+                .SelectMany(x => x.Lines)
+                .Select(line => DistanceHelper.FindClosestPointOnLine(
+                    car.BoundingBox.Center, 
+                    line))
+                .Select(x => x.GetDistanceTo(car.BoundingBox.Center))
+                .OrderBy(x => x)
+                .First();
+        }
 
-            return intersectionPoint.Value.GetDistanceTo(car.BoundingBox.Center);
+        public CarSensorReadingSnapshot GetSensorReadings()
+        {
+            var mapLines = map.Nodes.SelectMany(x => x.Lines);
+            var sensorReadingCached = new CarSensorReadingSnapshot()
+            {
+                LeftSensor = GetSensorReading(mapLines, -360 / 8),
+                CenterSensor = GetSensorReading(mapLines, 0),
+                RightSensor = GetSensorReading(mapLines, 360 / 8)
+            };
+
+            return sensorReadingCached;
         }
 
         private CarSensorReading? GetSensorReading(
-            IEnumerable<Line> linesOrderedByProximity,
+            IEnumerable<Line> lines,
             double angleInDegrees)
         {
             var forwardDirectionLine = new Line()
             {
-                Start = car.ForwardDirectionLine.Start + car.BoundingBox.Center,
-                End = car.ForwardDirectionLine.End + car.BoundingBox.Center
+                Start = car.BoundingBox.Center,
+                End = car.ForwardDirectionLine.End * 2 + car.BoundingBox.Center
             };
             var sensorLine = forwardDirectionLine.Rotate(angleInDegrees);
 
             var carSensorReadings = new HashSet<CarSensorReading>();
-            foreach (var line in linesOrderedByProximity)
+            foreach (var line in lines)
             {
                 var intersectionPointNullable = sensorLine.GetIntersectionPointWith(line);
                 if (intersectionPointNullable == null)
