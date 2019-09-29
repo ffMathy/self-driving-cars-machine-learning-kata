@@ -23,8 +23,8 @@ namespace MachineLearningPractice.Models
             {
                 var line = new Line()
                 {
-                    Start = new Point(0, -0.5),
-                    End = new Point(0, 0)
+                    Start = new Point(0, 0),
+                    End = new Point(0, -0.5)
                 };
 
                 return line.Rotate(TurnAngle);
@@ -67,8 +67,8 @@ namespace MachineLearningPractice.Models
             TurnAngle += TurnAngleVelocity;
 
             BoundingBox.Location = new Point(
-                BoundingBox.Location.X - (ForwardDirectionLine.End.X * SpeedVelocity),
-                BoundingBox.Location.Y - (ForwardDirectionLine.End.Y * SpeedVelocity));
+                BoundingBox.Location.X + (ForwardDirectionLine.End.X * 2 * SpeedVelocity),
+                BoundingBox.Location.Y + (ForwardDirectionLine.End.Y * 2 * SpeedVelocity));
         }
     }
 }

@@ -55,7 +55,7 @@ namespace MachineLearningPractice.Helpers
             };
 
             var angle = sensorLine.GetAngleTo(lineToIntersectionPoint);
-            return angle > -90 && angle < 90;
+            return angle < 90 || angle > 270;
         }
 
         public static bool IsPointOutsideLineBoundaries(Line line, Point intersectionPoint)

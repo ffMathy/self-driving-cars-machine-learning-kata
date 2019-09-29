@@ -66,9 +66,6 @@ namespace MachineLearningPractice.Models
             var angleRadians = Math.Min(difference, Math.Abs(180 - difference));
             var angleDegrees = MathHelper.RadiansToDegrees(angleRadians);
 
-            if(angleDegrees > 180)
-                angleDegrees = -(180 - angleDegrees);
-
             return angleDegrees;
         }
 

@@ -125,7 +125,12 @@ namespace MachineLearningPractice.Services
             IEnumerable<Line> linesOrderedByProximity,
             double angleInDegrees)
         {
-            var sensorLine = car.ForwardDirectionLine.Rotate(angleInDegrees);
+            var forwardDirectionLine = new Line()
+            {
+                Start = car.ForwardDirectionLine.Start + car.BoundingBox.Center,
+                End = car.ForwardDirectionLine.End + car.BoundingBox.Center
+            };
+            var sensorLine = forwardDirectionLine.Rotate(angleInDegrees);
 
             var carSensorReadings = new HashSet<CarSensorReading>();
             foreach (var line in linesOrderedByProximity)

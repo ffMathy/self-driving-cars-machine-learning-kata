@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MachineLearningPractice.Helpers
 {
-    class MathHelper
+    public class MathHelper
     {
         public static bool IsEqualWithinRange(double a, double b, double delta)
         {

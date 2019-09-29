@@ -37,9 +37,52 @@ namespace MachineLearningPractice.Tests.Models
                 0);
 
             var readings = carSimulation.GetSensorReadings();
+
             Assert.IsNotNull(readings.LeftSensor);
             Assert.IsNotNull(readings.CenterSensor);
             Assert.IsNotNull(readings.RightSensor);
+
+            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.LeftSensor.Value.IntersectionPoint.X, -50, 0.5));
+            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.LeftSensor.Value.IntersectionPoint.Y, -50, 0.5));
+
+            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.CenterSensor.Value.IntersectionPoint.X, 0, 0.5));
+            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.CenterSensor.Value.IntersectionPoint.Y, -150, 0.5));
+
+            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.RightSensor.Value.IntersectionPoint.X, 50, 0.5));
+            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.RightSensor.Value.IntersectionPoint.Y, -50, 0.5));
+        }
+
+        [TestMethod]
+        public void CarAboveCenteredBoxShowsCorrectSensorReadings()
+        {
+            var random = new Random();
+            var carNeuralNetwork = new CarNeuralNetwork();
+
+            var map = GenerateCircularMap();
+
+            var carSimulation = new CarSimulation(
+                random,
+                map,
+                carNeuralNetwork,
+                0);
+
+            carSimulation.Car.Accelerate(10);
+            carSimulation.Car.Tick();
+
+            var readings = carSimulation.GetSensorReadings();
+
+            Assert.IsNotNull(readings.LeftSensor);
+            Assert.IsNotNull(readings.CenterSensor);
+            Assert.IsNotNull(readings.RightSensor);
+
+            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.LeftSensor.Value.IntersectionPoint.X, -50, 0.5));
+            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.LeftSensor.Value.IntersectionPoint.Y, -40, 0.5));
+
+            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.CenterSensor.Value.IntersectionPoint.X, 0, 0.5));
+            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.CenterSensor.Value.IntersectionPoint.Y, -150, 0.5));
+
+            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.RightSensor.Value.IntersectionPoint.X, 50, 0.5));
+            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.RightSensor.Value.IntersectionPoint.Y, -40, 0.5));
         }
     }
 }
