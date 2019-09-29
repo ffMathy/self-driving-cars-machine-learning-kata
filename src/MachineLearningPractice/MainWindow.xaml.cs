@@ -122,7 +122,9 @@ namespace MachineLearningPractice
                 Width = car.BoundingBox.Size.Width,
                 Height = car.BoundingBox.Size.Height,
                 Fill = Brushes.Transparent,
-                Stroke = Brushes.Blue,
+                Stroke = carSimulation.IsCrashed ? 
+                    Brushes.Red :
+                    Brushes.Green,
                 StrokeThickness = 3,
                 Opacity = 1
             };
@@ -136,6 +138,9 @@ namespace MachineLearningPractice
 
         private void RenderCarSimulationSensorReadings(CarSimulation carSimulation)
         {
+            if (carSimulation.IsCrashed)
+                return;
+
             var car = carSimulation.Car;
 
             var sensorReadings = carSimulation.GetSensorReadings();
@@ -177,11 +182,15 @@ namespace MachineLearningPractice
             };
             MapCanvas.Children.Add(line);
 
-            RenderCarSimulationSensorReadings(car, sensorReadingsArray);
+            RenderCarSimulationSensorReadings(carSimulation, sensorReadingsArray);
         }
 
-        private void RenderCarSimulationSensorReadings(Car car, CarSensorReading?[] sensorReadingsArray)
+        private void RenderCarSimulationSensorReadings(CarSimulation carSimulation, CarSensorReading?[] sensorReadingsArray)
         {
+            if(carSimulation.IsCrashed)
+                return;
+
+            var car = carSimulation.Car;
             foreach (var sensorReading in sensorReadingsArray)
             {
                 if(sensorReading == null)
