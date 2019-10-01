@@ -82,8 +82,8 @@ namespace MachineLearningPractice.Services
             var sensorReadings = GetSensorReadings();
             var neuralNetCarResponse = this.carNeuralNetwork.Ask(sensorReadings);
 
-            var deltaVelocity = neuralNetCarResponse.AccelerationDeltaVelocity + GetRandomnessFactor(5);
-            var deltaAngle = neuralNetCarResponse.TurnDeltaAngle + GetRandomnessFactor(1);
+            var deltaVelocity = (neuralNetCarResponse.AccelerationDeltaVelocity) + GetRandomnessFactor(5);
+            var deltaAngle = (neuralNetCarResponse.TurnDeltaAngle) + GetRandomnessFactor(1);
 
             deltaVelocity = car.Accelerate(deltaVelocity);
             deltaAngle = car.Turn(deltaAngle);

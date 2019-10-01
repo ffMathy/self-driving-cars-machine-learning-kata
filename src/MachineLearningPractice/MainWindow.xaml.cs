@@ -300,7 +300,7 @@ namespace MachineLearningPractice
 
         private async void TrainMultipleGenerationsButton_Click(object sender, RoutedEventArgs e)
         {
-            for (var i = 0; i < 5; i++)
+            for (var i = 0; i < 50; i++)
             {
                 await TrainGeneration(0);
             }
