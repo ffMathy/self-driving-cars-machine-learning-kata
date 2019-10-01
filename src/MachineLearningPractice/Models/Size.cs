@@ -8,7 +8,7 @@ namespace MachineLearningPractice.Models
 {
     public class Size
     {
-        public double Width { get; set; }
-        public double Height { get; set; }
+        public decimal Width { get; set; }
+        public decimal Height { get; set; }
     }
 }

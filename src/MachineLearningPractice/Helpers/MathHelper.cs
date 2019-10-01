@@ -6,9 +6,17 @@ namespace MachineLearningPractice.Helpers
 {
     public class MathHelper
     {
-        public static bool IsEqualWithinRange(double a, double b, double delta)
+        private readonly Random random;
+
+        public MathHelper(
+            Random random)
         {
-            return Math.Abs(a - b) <= delta;
+            this.random = random;
+        }
+
+        public static bool IsEqualWithinRange(decimal a, decimal b, double delta)
+        {
+            return Math.Abs((double)a - (double)b) <= delta;
         }
 
         public static double RadiansToDegrees(double radians)

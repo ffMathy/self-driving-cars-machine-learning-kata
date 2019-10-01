@@ -14,8 +14,8 @@ namespace MachineLearningPractice.Tests.Models
             var rotatedPoint = point.RotateAround(centerPoint, 90);
 
             var delta = new Point(1, -1) - rotatedPoint;
-            Assert.IsTrue(delta.X < 0.001);
-            Assert.IsTrue(delta.Y < 0.001);
+            Assert.IsTrue(delta.X < 0.001m);
+            Assert.IsTrue(delta.Y < 0.001m);
         }
 
         [TestMethod]
@@ -26,8 +26,8 @@ namespace MachineLearningPractice.Tests.Models
             var rotatedPoint = point.RotateAround(centerPoint, 90);
 
             var delta = new Point(1, -2) - rotatedPoint;
-            Assert.IsTrue(delta.X < 0.001);
-            Assert.IsTrue(delta.Y < 0.001);
+            Assert.IsTrue(delta.X < 0.001m);
+            Assert.IsTrue(delta.Y < 0.001m);
         }
     }
 }

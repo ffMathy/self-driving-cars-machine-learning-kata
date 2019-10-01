@@ -14,10 +14,10 @@ namespace MachineLearningPractice.Models
 
         public BoundingBox BoundingBox { get; }
 
-        public double SpeedVelocity { get; private set; }
+        public decimal SpeedVelocity { get; private set; }
 
-        public double TurnAngle { get; private set; }
-        public double TurnAngleVelocity { get; private set; }
+        public decimal TurnAngle { get; private set; }
+        public decimal TurnAngleVelocity { get; private set; }
 
         public Line ForwardDirectionLine
         {
@@ -26,7 +26,7 @@ namespace MachineLearningPractice.Models
                 var line = new Line()
                 {
                     Start = new Point(0, 0),
-                    End = new Point(0, -0.5)
+                    End = new Point(0, 0.5m)
                 };
 
                 return line.Rotate(TurnAngle);
@@ -52,16 +52,35 @@ namespace MachineLearningPractice.Models
             };
         }
 
-        public void Turn(double deltaAngle)
+        public decimal Turn(decimal deltaAngle)
         {
             TurnAngleVelocity += deltaAngle;
-            TurnAngleVelocity = Math.Min(10, TurnAngleVelocity);
+
+            const int threshold = 10;
+
+            if (TurnAngleVelocity < -threshold)
+                TurnAngleVelocity = -threshold;
+
+            if (TurnAngleVelocity > threshold)
+                TurnAngleVelocity = threshold;
+
+            return TurnAngle;
         }
 
-        public void Accelerate(double deltaVelocity)
+        public decimal Accelerate(decimal deltaVelocity)
         {
             SpeedVelocity += deltaVelocity;
-            SpeedVelocity = Math.Min(10, SpeedVelocity);
+            
+            const int highThreshold = 10;
+            const int lowThreshold = -2;
+
+            if (SpeedVelocity < -lowThreshold)
+                SpeedVelocity = -lowThreshold;
+
+            if (SpeedVelocity > highThreshold)
+                SpeedVelocity = highThreshold;
+
+            return SpeedVelocity;
         }
 
         public void Tick()

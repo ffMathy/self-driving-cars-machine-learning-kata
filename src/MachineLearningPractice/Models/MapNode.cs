@@ -15,5 +15,7 @@ namespace MachineLearningPractice.Models
         public Point Position { get; set; }
 
         public Line[] Lines { get;set;}
+
+        public int Offset { get; set; }
     }
 }

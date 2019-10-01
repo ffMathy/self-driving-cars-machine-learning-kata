@@ -10,8 +10,8 @@ namespace MachineLearningPractice.Services
 {
     public struct CarResponse
     {
-        public double AccelerationDeltaVelocity { get; set; }
-        public double TurnDeltaAngle { get; set; }
+        public decimal AccelerationDeltaVelocity { get; set; }
+        public decimal TurnDeltaAngle { get; set; }
     }
 
     public struct CarSensorReadingSnapshot
@@ -29,22 +29,28 @@ namespace MachineLearningPractice.Services
 
     public class CarSimulation
     {
-        private readonly Car car;
         private readonly Random random;
         private readonly Map map;
         private readonly CarNeuralNetwork carNeuralNetwork;
 
         private readonly List<CarSimulationTick> pendingTrainingInstructions;
 
-        private readonly double randomnessFactor;
+        private readonly decimal randomnessFactor;
+
+        private MapNode currentMapNode;
+        private Car car;
 
         private ulong ticksSurvived;
+        private decimal distanceTraveled;
 
         private bool isCrashed;
 
         public ulong TicksSurvived => ticksSurvived;
+        public decimal DistanceTraveled => distanceTraveled;
 
         public Car Car => car;
+
+        public MapNode CurrentMapNode => currentMapNode;
 
         public IReadOnlyList<CarSimulationTick> PendingTrainingInstructions => pendingTrainingInstructions;
 
@@ -54,7 +60,7 @@ namespace MachineLearningPractice.Services
             Random random,
             Map map,
             CarNeuralNetwork carNeuralNetwork,
-            double randomnessFactor)
+            decimal randomnessFactor)
         {
             this.ticksSurvived = 0;
 
@@ -68,44 +74,52 @@ namespace MachineLearningPractice.Services
             this.randomnessFactor = randomnessFactor;
         }
 
-        public bool Tick()
+        public void Tick()
         {
             if(isCrashed)
-                return false;
+                return;
 
             var sensorReadings = GetSensorReadings();
             var neuralNetCarResponse = this.carNeuralNetwork.Ask(sensorReadings);
 
-            var adjustedCarResponse = new CarResponse()
-            {
-                AccelerationDeltaVelocity = 
-                    neuralNetCarResponse.AccelerationDeltaVelocity + 
-                    GetRandomnessFactor(10),
-                TurnDeltaAngle = 
-                    neuralNetCarResponse.TurnDeltaAngle + 
-                    GetRandomnessFactor(10)
-            };
+            var deltaVelocity = neuralNetCarResponse.AccelerationDeltaVelocity + GetRandomnessFactor(5);
+            var deltaAngle = neuralNetCarResponse.TurnDeltaAngle + GetRandomnessFactor(1);
 
-            car.Accelerate(adjustedCarResponse.AccelerationDeltaVelocity);
-            car.Turn(adjustedCarResponse.TurnDeltaAngle);
+            deltaVelocity = car.Accelerate(deltaVelocity);
+            deltaAngle = car.Turn(deltaAngle);
 
             car.Tick();
 
             var distanceToClosestIntersectionPoint = GetDistanceToClosestIntersectionPoint();
             if(distanceToClosestIntersectionPoint < Car.Size / 3) {
                 isCrashed = true;
-                return false;
+                return;
             }
+
+            currentMapNode = map.Nodes
+                .OrderBy(x => x.Position.GetDistanceTo(car.BoundingBox.Center))
+                .First();
 
             pendingTrainingInstructions.Add(new CarSimulationTick()
             {
-                CarResponse = adjustedCarResponse,
+                CarResponse = new CarResponse() {
+                    AccelerationDeltaVelocity = deltaVelocity,
+                    TurnDeltaAngle = deltaAngle
+                },
                 CarSensorReading = sensorReadings
             });
 
+            distanceTraveled += car.SpeedVelocity;
             ticksSurvived++;
+        }
 
-            return true;
+        public void Reset()
+        {
+            currentMapNode = null;
+            isCrashed = false;
+            ticksSurvived = 0;
+            
+            car = new Car();
         }
 
         private double GetDistanceToClosestIntersectionPoint()
@@ -135,7 +149,7 @@ namespace MachineLearningPractice.Services
 
         private CarSensorReading? GetSensorReading(
             IEnumerable<Line> lines,
-            double angleInDegrees)
+            decimal angleInDegrees)
         {
             var forwardDirectionLine = new Line()
             {
@@ -174,9 +188,9 @@ namespace MachineLearningPractice.Services
                 .First();
         }
 
-        private double GetRandomnessFactor(double multiplier)
+        private decimal GetRandomnessFactor(decimal multiplier)
         {
-            return ((random.NextDouble() * randomnessFactor * 2) - randomnessFactor) * multiplier;
+            return (((decimal)random.NextDouble() * randomnessFactor * 2) - randomnessFactor) * multiplier;
         }
     }
 }

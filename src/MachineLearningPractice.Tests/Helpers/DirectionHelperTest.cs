@@ -20,16 +20,16 @@ namespace MachineLearningPractice.Tests.Helpers
                         Start = new Point(-1, -1),
                         End = new Point(1, 1)
                     },
-                    new Point(0.5, 0.5)));
+                    new Point(0.5m, 0.5m)));
 
             Assert.IsTrue(DirectionHelper
                 .IsPointInDirectionOfSensorLine(
                     new Line()
                     {
                         Start = new Point(0, 0),
-                        End = new Point(0.1, 0.1)
+                        End = new Point(0.1m, 0.1m)
                     },
-                    new Point(0.5, 0.5)));
+                    new Point(0.5m, 0.5m)));
         }
     }
 }

@@ -10,9 +10,9 @@ namespace MachineLearningPractice.Models
 {
     public struct LineFormula
     {
-        public double A { get; set; }
-        public double B { get; set; }
-        public double C { get; set; }
+        public decimal A { get; set; }
+        public decimal B { get; set; }
+        public decimal C { get; set; }
     }
 
     public struct Line
@@ -40,7 +40,7 @@ namespace MachineLearningPractice.Models
             }
         }
 
-        public Line Rotate(double angleInDegrees) {
+        public Line Rotate(decimal angleInDegrees) {
             return new Line() {
                 Start = Start.RotateAround(
                     Center,
@@ -54,12 +54,12 @@ namespace MachineLearningPractice.Models
         public double GetAngleTo(Line other)
         {
             var theta1 = Math.Atan2(
-                this.Start.Y - this.End.Y, 
-                this.Start.X - this.End.X);
+                (double)this.Start.Y - (double)this.End.Y, 
+                (double)this.Start.X - (double)this.End.X);
 
             var theta2 = Math.Atan2(
-                other.Start.Y - other.End.Y,
-                other.Start.X - other.End.X);
+                (double)other.Start.Y - (double)other.End.Y,
+                (double)other.Start.X - (double)other.End.X);
 
             var difference = Math.Abs(theta1 - theta2);
 

@@ -77,12 +77,12 @@ namespace MachineLearningPractice.Tests.Models
             };
 
             var deltaStart = destinationLine.Start - rotatedLine.Start;
-            Assert.IsTrue(deltaStart.X < 0.001);
-            Assert.IsTrue(deltaStart.Y < 0.001);
+            Assert.IsTrue(deltaStart.X < 0.001m);
+            Assert.IsTrue(deltaStart.Y < 0.001m);
 
             var deltaEnd = destinationLine.End - rotatedLine.End;
-            Assert.IsTrue(deltaEnd.X < 0.001);
-            Assert.IsTrue(deltaEnd.Y < 0.001);
+            Assert.IsTrue(deltaEnd.X < 0.001m);
+            Assert.IsTrue(deltaEnd.Y < 0.001m);
         }
 
         [TestMethod]

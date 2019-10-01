@@ -8,29 +8,29 @@ namespace MachineLearningPractice.Models
 {
     public struct Point
     {
-        public double X { get; set; }
-        public double Y { get; set; }
+        public decimal X { get; set; }
+        public decimal Y { get; set; }
 
-        public Point(double x, double y)
+        public Point(decimal x, decimal y)
         {
             X = x;
             Y = y;
         }
 
-        public Point(double factor, double x, double y) : this(x * factor, y * factor)
+        public Point(decimal factor, decimal x, decimal y) : this(x * factor, y * factor)
         {
         }
 
-        public Point RotateAround(Point centerPoint, double angleInDegrees)
+        public Point RotateAround(Point centerPoint, decimal angleInDegrees)
         {
             if(angleInDegrees == 0)
                 return new Point(X, Y);
 
             var pointToRotate = this;
 
-            var angleInRadians = angleInDegrees * (Math.PI / 180);
-            var cosTheta = Math.Cos(angleInRadians);
-            var sinTheta = Math.Sin(angleInRadians);
+            var angleInRadians = (double)angleInDegrees * (Math.PI / 180);
+            var cosTheta = (decimal)Math.Cos(angleInRadians);
+            var sinTheta = (decimal)Math.Sin(angleInRadians);
 
             return new Point
             {
@@ -43,8 +43,8 @@ namespace MachineLearningPractice.Models
 
         public double GetDistanceTo(Point other)
         {
-            var a = Math.Abs(other.X - this.X);
-            var b = Math.Abs(other.Y - this.Y);
+            var a = (double)Math.Abs(other.X - this.X);
+            var b = (double)Math.Abs(other.Y - this.Y);
 
             return Math.Sqrt(Math.Pow(a, 2) + Math.Pow(b, 2));
         }

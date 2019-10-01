@@ -53,8 +53,8 @@ namespace MachineLearningPractice.Services
                 .Select(x => x.CarResponse)
                 .Select(x => new[]
                 {
-                    x.AccelerationDeltaVelocity,
-                    x.TurnDeltaAngle
+                    (double)x.AccelerationDeltaVelocity,
+                    (double)x.TurnDeltaAngle
                 })
                 .ToArray();
 
@@ -71,8 +71,8 @@ namespace MachineLearningPractice.Services
                 GetNeuralInputFromSensorReading(sensorReading));
             return new CarResponse()
             {
-                AccelerationDeltaVelocity = prediction[0],
-                TurnDeltaAngle = prediction[1]
+                AccelerationDeltaVelocity = (decimal)prediction[0],
+                TurnDeltaAngle = (decimal)prediction[1]
             };
         }
 

@@ -27,6 +27,7 @@ namespace MachineLearningPractice.Services
         public MapBuilder MoveInDirection(Direction direction)
         {
             var node = GenerateMapSegmentNode(
+                nodes.Count,
                 origin,
                 DirectionHelper.GetOppositeDirection(previousDirection),
                 direction);
@@ -51,6 +52,7 @@ namespace MachineLearningPractice.Services
         }
 
         private static MapNode GenerateMapSegmentNode(
+            int offset,
             Point origin,
             Direction entranceDirection,
             Direction exitDirection)
@@ -81,11 +83,12 @@ namespace MachineLearningPractice.Services
 
             return new MapNode()
             {
+                Offset = offset,
                 EntranceDirection = entranceDirection,
                 ExitDirection = exitDirection,
                 Lines = lines.ToArray(),
                 Position = new Point(
-                    Map.TileSize,
+                    (decimal)Map.TileSize,
                     origin.X, 
                     origin.Y)
             };
@@ -95,8 +98,8 @@ namespace MachineLearningPractice.Services
         {
             return new Line()
             {
-                Start = new Point(Map.TileSize, 0.5 + origin.X, -0.5 + origin.Y),
-                End = new Point(Map.TileSize, 0.5 + origin.X, 0.5 + origin.Y)
+                Start = new Point((decimal)Map.TileSize, 0.5m + origin.X, -0.5m + origin.Y),
+                End = new Point((decimal)Map.TileSize, 0.5m + origin.X, 0.5m + origin.Y)
             };
         }
 
@@ -104,8 +107,8 @@ namespace MachineLearningPractice.Services
         {
             return new Line()
             {
-                Start = new Point(Map.TileSize, -0.5 + origin.X, -0.5 + origin.Y),
-                End = new Point(Map.TileSize, -0.5 + origin.X, 0.5 + origin.Y)
+                Start = new Point((decimal)Map.TileSize, -0.5m + origin.X, -0.5m + origin.Y),
+                End = new Point((decimal)Map.TileSize, -0.5m + origin.X, 0.5m + origin.Y)
             };
         }
 
@@ -113,8 +116,8 @@ namespace MachineLearningPractice.Services
         {
             return new Line()
             {
-                Start = new Point(Map.TileSize, -0.5 + origin.X, 0.5 + origin.Y),
-                End = new Point(Map.TileSize, 0.5 + origin.X, 0.5 + origin.Y)
+                Start = new Point((decimal)Map.TileSize, -0.5m + origin.X, 0.5m + origin.Y),
+                End = new Point((decimal)Map.TileSize, 0.5m + origin.X, 0.5m + origin.Y)
             };
         }
 
@@ -122,8 +125,8 @@ namespace MachineLearningPractice.Services
         {
             return new Line()
             {
-                Start = new Point(Map.TileSize, -0.5 + origin.X, -0.5 + origin.Y),
-                End = new Point(Map.TileSize, 0.5 + origin.X, -0.5 + origin.Y)
+                Start = new Point((decimal)Map.TileSize, -0.5m + origin.X, -0.5m + origin.Y),
+                End = new Point((decimal)Map.TileSize, 0.5m + origin.X, -0.5m + origin.Y)
             };
         }
     }

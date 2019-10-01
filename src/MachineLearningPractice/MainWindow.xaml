@@ -15,9 +15,18 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
             <ColumnDefinition />
+            <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <Button Name="GenerateNewMapButton" Click="GenerateNewMapButton_Click" Padding="24">Generate new map</Button>
-        <Button Grid.Column="1" Name="TrainGenerationButton" Click="TrainGenerationButton_Click" Padding="24">Train single generation</Button>
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <CheckBox Name="KeepRunningCheckbox" HorizontalAlignment="Center" Margin="12" Checked="KeepRunningCheckbox_Checked" Unchecked="KeepRunningCheckbox_Unchecked">Keep running</CheckBox>
+            <Button Grid.Row="1" Name="TrainGenerationButton" Click="TrainGenerationButton_Click" Padding="24">Train single generation</Button>
+        </Grid>
+        <Button Grid.Column="2" Name="TrainMultipleGenerationsButton" Click="TrainMultipleGenerationsButton_Click" Padding="24">Train multiple generations</Button>
         <Canvas SnapsToDevicePixels="True" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="1" Name="MapCanvas">
             
         </Canvas>
