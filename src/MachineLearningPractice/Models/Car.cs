@@ -64,7 +64,7 @@ namespace MachineLearningPractice.Models
             if (TurnAngleVelocity > threshold)
                 TurnAngleVelocity = threshold;
 
-            return TurnAngle;
+            return TurnAngleVelocity;
         }
 
         public decimal Accelerate(decimal deltaVelocity)
@@ -72,10 +72,10 @@ namespace MachineLearningPractice.Models
             SpeedVelocity += deltaVelocity;
             
             const int highThreshold = 10;
-            const int lowThreshold = -2;
+            const int lowThreshold = 1;
 
-            if (SpeedVelocity < -lowThreshold)
-                SpeedVelocity = -lowThreshold;
+            if (SpeedVelocity < lowThreshold)
+                SpeedVelocity = lowThreshold;
 
             if (SpeedVelocity > highThreshold)
                 SpeedVelocity = highThreshold;

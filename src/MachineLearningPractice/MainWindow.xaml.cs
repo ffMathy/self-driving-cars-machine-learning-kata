@@ -48,7 +48,7 @@ namespace MachineLearningPractice
 
         private void LoadSimulations()
         {
-            const int simulationCount = 10;
+            const int simulationCount = 30;
 
             simulations = new List<CarSimulation>();
             for (var i = 0; i < simulationCount; i++)
@@ -70,7 +70,7 @@ namespace MachineLearningPractice
         {
             do
             {
-                await TrainGeneration(100);
+                await TrainGeneration(10);
             } while (keepRunning);
         }
 
