@@ -90,14 +90,18 @@ namespace MachineLearningPractice.Services
 
             car.Tick();
 
-            var distanceToClosestIntersectionPoint = GetDistanceToClosestIntersectionPoint();
-            if(distanceToClosestIntersectionPoint < Car.Size / 3) {
+            var wallLines = map.Nodes.SelectMany(x => x.WallLines);
+            var distanceToClosestWallPoint = GetDistanceToClosestIntersectionPoint(wallLines);
+            if(distanceToClosestWallPoint < Car.Size / 2) {
                 isCrashed = true;
                 return;
             }
 
-            currentMapNode = map.Nodes
-                .OrderBy(x => x.Position.GetDistanceTo(car.BoundingBox.Center))
+            var progressLines = map.Nodes.SelectMany(x => x.ProgressLines); 
+            var distanceToClosestProgressPoint = GetDistanceToClosestIntersectionPoint(wallLines);
+            currentMapNode = 
+                .Select(x => x.GetIntersectionPointWith(car.ForwardDirectionLine))
+                .OrderBy(x => DistanceHelper.)
                 .First();
 
             pendingTrainingInstructions.Add(new CarSimulationTick()
@@ -122,10 +126,9 @@ namespace MachineLearningPractice.Services
             car = new Car();
         }
 
-        private double GetDistanceToClosestIntersectionPoint()
+        private double GetDistanceToClosestIntersectionPoint(IEnumerable<Line> lines)
         {
-            return map.Nodes
-                .SelectMany(x => x.Lines)
+            return lines
                 .Select(line => DistanceHelper.FindClosestPointOnLine(
                     car.BoundingBox.Center, 
                     line))
@@ -136,7 +139,7 @@ namespace MachineLearningPractice.Services
 
         public CarSensorReadingSnapshot GetSensorReadings()
         {
-            var mapLines = map.Nodes.SelectMany(x => x.Lines);
+            var mapLines = map.Nodes.SelectMany(x => x.WallLines);
             var sensorReadingCached = new CarSensorReadingSnapshot()
             {
                 LeftSensor = GetSensorReading(mapLines, -360 / 8),

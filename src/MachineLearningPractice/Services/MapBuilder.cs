@@ -46,7 +46,8 @@ namespace MachineLearningPractice.Services
 
         public Map Build()
         {
-            return new Map() {
+            return new Map()
+            {
                 Nodes = nodes.ToArray()
             };
         }
@@ -62,6 +63,68 @@ namespace MachineLearningPractice.Services
                 throw new InvalidOperationException("Entrance and exit directions must be different.");
             }
 
+            return new MapNode()
+            {
+                Offset = offset,
+                EntranceDirection = entranceDirection,
+                ExitDirection = exitDirection,
+                ProgressLines = GetProgressLines(
+                    origin,
+                    entranceDirection,
+                    exitDirection),
+                WallLines = GetWallLines(
+                    origin,
+                    entranceDirection,
+                    exitDirection),
+                Position = new Point(
+                    (decimal)Map.TileSize,
+                    origin.X,
+                    origin.Y)
+            };
+        }
+
+        private static Line[] GetProgressLines(
+            Point origin,
+            Direction entranceDirection,
+            Direction exitDirection)
+        {
+            var lines = new List<Line>();
+
+            var combinedDirection = DirectionHelper.GetCombinedDirection(
+                entranceDirection,
+                exitDirection);
+
+            var directions = new[]
+            {
+                combinedDirection,
+                DirectionHelper.GetOppositeDirection(combinedDirection)
+            };
+
+            if (directions.Contains(Direction.BottomLeft))
+            {
+                lines.Add(GetBottomLeftProgressLine(origin));
+            }
+            else if (directions.Contains(Direction.BottomRight))
+            {
+                lines.Add(GetBottomRightProgressLine(origin));
+            }
+            else if (directions.Contains(Direction.Bottom))
+            {
+                lines.Add(GetBottomProgressLine(origin));
+            }
+            else if (directions.Contains(Direction.Right))
+            {
+                lines.Add(GetRightProgressLine(origin));
+            }
+
+            return lines.ToArray();
+        }
+
+        private static Line[] GetWallLines(
+            Point origin,
+            Direction entranceDirection,
+            Direction exitDirection)
+        {
             var openingDirections = new[] {
                 entranceDirection,
                 exitDirection
@@ -81,16 +144,42 @@ namespace MachineLearningPractice.Services
             if (!openingDirections.Contains(Direction.Right))
                 lines.Add(GetRightWallLine(origin));
 
-            return new MapNode()
+            return lines.ToArray();
+        }
+
+        private static Line GetRightProgressLine(Point origin)
+        {
+            return new Line()
             {
-                Offset = offset,
-                EntranceDirection = entranceDirection,
-                ExitDirection = exitDirection,
-                Lines = lines.ToArray(),
-                Position = new Point(
-                    (decimal)Map.TileSize,
-                    origin.X, 
-                    origin.Y)
+                Start = new Point((decimal)Map.TileSize, 0m + origin.X, -0.5m + origin.Y),
+                End = new Point((decimal)Map.TileSize, 0m + origin.X, 0.5m + origin.Y)
+            };
+        }
+
+        private static Line GetBottomProgressLine(Point origin)
+        {
+            return new Line()
+            {
+                Start = new Point((decimal)Map.TileSize, -0.5m + origin.X, 0m + origin.Y),
+                End = new Point((decimal)Map.TileSize, 0.5m + origin.X, 0m + origin.Y)
+            };
+        }
+
+        private static Line GetBottomRightProgressLine(Point origin)
+        {
+            return new Line()
+            {
+                Start = new Point((decimal)Map.TileSize, 0.5m + origin.X, 0.5m + origin.Y),
+                End = new Point((decimal)Map.TileSize, -0.5m + origin.X, -0.5m + origin.Y)
+            };
+        }
+
+        private static Line GetBottomLeftProgressLine(Point origin)
+        {
+            return new Line()
+            {
+                Start = new Point((decimal)Map.TileSize, -0.5m + origin.X, 0.5m + origin.Y),
+                End = new Point((decimal)Map.TileSize, 0.5m + origin.X, -0.5m + origin.Y)
             };
         }
 

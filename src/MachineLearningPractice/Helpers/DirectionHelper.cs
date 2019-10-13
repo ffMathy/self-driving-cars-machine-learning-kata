@@ -28,6 +28,63 @@ namespace MachineLearningPractice.Helpers
             }
         }
 
+        public static Direction GetCombinedDirection(
+            Direction a,
+            Direction b)
+        {
+            if(b == GetOppositeDirection(a))
+                return b;
+
+            if (a == Direction.Left) { 
+                switch(b)
+                {
+                    case Direction.Bottom:
+                        return Direction.BottomRight;
+
+                    case Direction.Top:
+                        return Direction.TopRight;
+                }
+            }
+
+            if(a == Direction.Right)
+            {
+                switch (b)
+                {
+                    case Direction.Bottom:
+                        return Direction.BottomLeft;
+
+                    case Direction.Top:
+                        return Direction.TopLeft;
+                }
+            }
+
+            if (a == Direction.Top)
+            {
+                switch (b)
+                {
+                    case Direction.Left:
+                        return Direction.BottomLeft;
+
+                    case Direction.Right:
+                        return Direction.BottomRight;
+                }
+            }
+
+            if (a == Direction.Bottom)
+            {
+                switch (b)
+                {
+                    case Direction.Left:
+                        return Direction.TopLeft;
+
+                    case Direction.Right:
+                        return Direction.TopRight;
+                }
+            }
+
+            return GetCombinedDirection(b, a);
+        }
+
         public Direction GetRandomDirection()
         {
             return (Direction)random.Next(0, 4);
@@ -41,6 +98,10 @@ namespace MachineLearningPractice.Helpers
                 Direction.Left => Direction.Right,
                 Direction.Top => Direction.Bottom,
                 Direction.Right => Direction.Left,
+                Direction.BottomLeft => Direction.TopRight,
+                Direction.BottomRight => Direction.TopLeft,
+                Direction.TopLeft => Direction.BottomRight,
+                Direction.TopRight => Direction.BottomLeft,
 
                 _ => throw new ArgumentOutOfRangeException(nameof(direction)),
             };

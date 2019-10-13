@@ -10,7 +10,7 @@ namespace MachineLearningPractice.Models
 
     public class Car
     {
-        public const int Size = 20;
+        public const int Size = 50;
 
         public BoundingBox BoundingBox { get; }
 

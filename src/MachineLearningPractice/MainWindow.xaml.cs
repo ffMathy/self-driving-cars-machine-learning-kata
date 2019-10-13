@@ -135,17 +135,6 @@ namespace MachineLearningPractice
                     {
                         bestSimulationInGeneration = simulation;
                     }
-                    else if (carCurrentMapNode.Offset == bestCurrentMapNode.Offset)
-                    {
-                        var nextNode = map.Nodes.FirstOrDefault(x => x.Offset == carCurrentMapNode.Offset + 1);
-                        if(nextNode == null)
-                            continue;
-
-                        var carDistance = nextNode.Position.GetDistanceTo(simulation.Car.BoundingBox.Center);
-                        var bestDistance = nextNode.Position.GetDistanceTo(bestSimulationInGeneration.Car.BoundingBox.Center);
-                        if (carDistance < bestDistance)
-                            bestSimulationInGeneration = simulation;
-                    }
                 }
 
                 if (tickDelay > 0)
@@ -279,13 +268,14 @@ namespace MachineLearningPractice
             Canvas.SetLeft(rectangle, (double)node.Position.X - Map.TileSize / 2);
             Canvas.SetTop(rectangle, (double)node.Position.Y - Map.TileSize / 2);
 
-            foreach (var line in node.Lines)
-            {
-                RenderLine(line);
-            }
+            foreach (var line in node.ProgressLines)
+                RenderLine(line, Brushes.LightGray, 0.25);
+
+            foreach (var line in node.WallLines)
+                RenderLine(line, Brushes.DimGray, 1);
         }
 
-        private void RenderLine(Models.Line line)
+        private void RenderLine(Models.Line line, Brush brush, double opacity)
         {
             MapCanvas.Children.Add(new System.Windows.Shapes.Line()
             {
@@ -293,7 +283,8 @@ namespace MachineLearningPractice
                 Y1 = (double)line.Start.Y,
                 X2 = (double)line.End.X,
                 Y2 = (double)line.End.Y,
-                Stroke = Brushes.DarkGray,
+                Opacity = opacity,
+                Stroke = brush,
                 StrokeThickness = 2
             });
         }

@@ -11,6 +11,10 @@ namespace MachineLearningPractice.Models
         Top,
         Left,
         Right,
-        Bottom
+        Bottom,
+        TopLeft,
+        TopRight,
+        BottomLeft,
+        BottomRight
     }
 }
