@@ -33,26 +33,45 @@ namespace MachineLearningPractice.Services
         private readonly Map map;
         private readonly CarNeuralNetwork carNeuralNetwork;
 
-        private readonly List<CarSimulationTick> pendingTrainingInstructions;
+        private readonly IList<CarSimulationTick> pendingTrainingInstructions;
+        private readonly IList<ProgressLine> allProgressLines;
 
         private readonly decimal randomnessFactor;
 
-        private MapNode currentMapNode;
+        private ProgressLine currentProgressLine;
+
         private Car car;
 
-        private ulong ticksSurvived;
+        private long ticksSurvived;
         private decimal distanceTraveled;
 
         private bool isCrashed;
 
-        public ulong TicksSurvived => ticksSurvived;
+        private int laps;
+
+        public long TicksSurvived => ticksSurvived;
         public decimal DistanceTraveled => distanceTraveled;
+
+        public ProgressLine CurrentProgressLine => currentProgressLine;
+
+        public decimal Fitness
+        {
+            get
+            {
+                var lastOffset = allProgressLines.Last().Offset;
+
+                var progressPenalty = lastOffset - currentProgressLine.Offset;
+                var lapPenalty = -(lastOffset * this.laps) * 2;
+
+                var timePenalty = ticksSurvived;
+
+                return timePenalty + ((progressPenalty + lapPenalty) * 30);
+            }
+        }
 
         public Car Car => car;
 
-        public MapNode CurrentMapNode => currentMapNode;
-
-        public IReadOnlyList<CarSimulationTick> PendingTrainingInstructions => pendingTrainingInstructions;
+        public IReadOnlyList<CarSimulationTick> PendingTrainingInstructions => pendingTrainingInstructions.ToArray();
 
         public bool IsCrashed => isCrashed;
 
@@ -63,6 +82,12 @@ namespace MachineLearningPractice.Services
             decimal randomnessFactor)
         {
             this.ticksSurvived = 0;
+
+            this.allProgressLines = map.Nodes
+                .SelectMany(x => x
+                    .ProgressLines
+                    .OrderBy(l => l.Offset))
+                .ToArray();
 
             this.car = new Car();
 
@@ -76,14 +101,14 @@ namespace MachineLearningPractice.Services
 
         public void Tick()
         {
-            if(isCrashed)
+            if (isCrashed)
                 return;
 
             var sensorReadings = GetSensorReadings();
             var neuralNetCarResponse = this.carNeuralNetwork.Ask(sensorReadings);
 
-            var deltaVelocity = (neuralNetCarResponse.AccelerationDeltaVelocity) + GetRandomnessFactor(5);
-            var deltaAngle = (neuralNetCarResponse.TurnDeltaAngle) + GetRandomnessFactor(1);
+            var deltaVelocity = (neuralNetCarResponse.AccelerationDeltaVelocity) + GetRandomnessFactor(1);
+            var deltaAngle = (neuralNetCarResponse.TurnDeltaAngle) + GetRandomnessFactor(0.75m);
 
             deltaVelocity = car.Accelerate(deltaVelocity);
             deltaAngle = car.Turn(deltaAngle);
@@ -91,22 +116,35 @@ namespace MachineLearningPractice.Services
             car.Tick();
 
             var wallLines = map.Nodes.SelectMany(x => x.WallLines);
-            var distanceToClosestWallPoint = GetDistanceToClosestIntersectionPoint(wallLines);
-            if(distanceToClosestWallPoint < Car.Size / 2) {
+            var distanceToClosestWallPoint = GetDistanceToClosestWallLineIntersectionPoint(wallLines);
+            if (distanceToClosestWallPoint < Car.Size / 2)
+            {
                 isCrashed = true;
                 return;
             }
 
-            var progressLines = map.Nodes.SelectMany(x => x.ProgressLines); 
-            var distanceToClosestProgressPoint = GetDistanceToClosestIntersectionPoint(wallLines);
-            currentMapNode = 
-                .Select(x => x.GetIntersectionPointWith(car.ForwardDirectionLine))
-                .OrderBy(x => DistanceHelper.)
-                .First();
+            var previousProgressLine = currentProgressLine;
+            var newProgressLine = GetClosestIntersectionPointProgressLine(allProgressLines);
+            if(previousProgressLine == null || Math.Abs(newProgressLine.Offset - previousProgressLine.Offset) < 3)
+                currentProgressLine = newProgressLine;
+
+            if (previousProgressLine != null)
+            {
+                var lastOffset = allProgressLines.Last().Offset;
+                if (currentProgressLine.Offset == 0 && previousProgressLine.Offset == lastOffset)
+                {
+                    laps++;
+                }
+                else if (previousProgressLine.Offset == 0 && currentProgressLine.Offset == lastOffset)
+                {
+                    laps--;
+                }
+            }
 
             pendingTrainingInstructions.Add(new CarSimulationTick()
             {
-                CarResponse = new CarResponse() {
+                CarResponse = new CarResponse()
+                {
                     AccelerationDeltaVelocity = deltaVelocity,
                     TurnDeltaAngle = deltaAngle
                 },
@@ -119,19 +157,32 @@ namespace MachineLearningPractice.Services
 
         public void Reset()
         {
-            currentMapNode = null;
             isCrashed = false;
             ticksSurvived = 0;
-            
+            laps = 0;
+            currentProgressLine = null;
+            pendingTrainingInstructions.Clear();
+
             car = new Car();
         }
 
-        private double GetDistanceToClosestIntersectionPoint(IEnumerable<Line> lines)
+        private ProgressLine GetClosestIntersectionPointProgressLine(IEnumerable<ProgressLine> lines)
         {
             return lines
-                .Select(line => DistanceHelper.FindClosestPointOnLine(
-                    car.BoundingBox.Center, 
-                    line))
+                .OrderBy(x => DistanceHelper
+                    .FindClosestPointOnLine(
+                        car.BoundingBox.Center,
+                        x.Line)
+                    .GetDistanceTo(car.BoundingBox.Center))
+                .First();
+        }
+
+        private double GetDistanceToClosestWallLineIntersectionPoint(IEnumerable<WallLine> lines)
+        {
+            return lines
+                .Select(wallLine => DistanceHelper.FindClosestPointOnLine(
+                    car.BoundingBox.Center,
+                    wallLine.Line))
                 .Select(x => x.GetDistanceTo(car.BoundingBox.Center))
                 .OrderBy(x => x)
                 .First();
@@ -139,7 +190,10 @@ namespace MachineLearningPractice.Services
 
         public CarSensorReadingSnapshot GetSensorReadings()
         {
-            var mapLines = map.Nodes.SelectMany(x => x.WallLines);
+            var mapLines = map.Nodes
+                .SelectMany(x => x.WallLines)
+                .Select(x => x.Line)
+                .ToArray();
             var sensorReadingCached = new CarSensorReadingSnapshot()
             {
                 LeftSensor = GetSensorReading(mapLines, -360 / 8),

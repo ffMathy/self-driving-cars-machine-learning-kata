@@ -31,5 +31,19 @@ namespace MachineLearningPractice.Tests.Helpers
                     },
                     new Point(0.5m, 0.5m)));
         }
+
+        [TestMethod]
+        public void AngleBetweenDirectionsWorks()
+        {
+            Assert.AreEqual(45, DirectionHelper.GetClockwiseAngleBetweenDirections(Direction.Top, Direction.TopRight));
+            Assert.AreEqual(90, DirectionHelper.GetClockwiseAngleBetweenDirections(Direction.Top, Direction.Right));
+        }
+
+        [TestMethod]
+        public void CombinedDirectionWorks()
+        {
+            Assert.AreEqual(Direction.BottomRight, DirectionHelper.GetCombinedDirection(Direction.Bottom, Direction.Right));
+            Assert.AreEqual(Direction.TopLeft, DirectionHelper.GetCombinedDirection(Direction.Left, Direction.Top));
+        }
     }
 }

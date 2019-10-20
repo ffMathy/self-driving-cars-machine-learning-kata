@@ -77,10 +77,11 @@ namespace MachineLearningPractice.Tests.Models
             };
 
             var deltaStart = destinationLine.Start - rotatedLine.Start;
+            var deltaEnd = destinationLine.End - rotatedLine.End;
+
             Assert.IsTrue(deltaStart.X < 0.001m);
             Assert.IsTrue(deltaStart.Y < 0.001m);
 
-            var deltaEnd = destinationLine.End - rotatedLine.End;
             Assert.IsTrue(deltaEnd.X < 0.001m);
             Assert.IsTrue(deltaEnd.Y < 0.001m);
         }
@@ -96,13 +97,19 @@ namespace MachineLearningPractice.Tests.Models
 
             var rotatedLine = line.Rotate(-90);
 
-            Assert.AreEqual(
-                new Line()
-                {
-                    Start = new Point(-2, -1),
-                    End = new Point(1, -4)
-                },
-                rotatedLine);
+            var destinationLine = new Line {
+                Start = new Point(-2, -1),
+                End = new Point(1, -4)
+            };
+
+            var deltaStart = destinationLine.Start - rotatedLine.Start;
+            var deltaEnd = destinationLine.End - rotatedLine.End;
+
+            Assert.IsTrue(deltaStart.X < 0.001m);
+            Assert.IsTrue(deltaStart.Y < 0.001m);
+
+            Assert.IsTrue(deltaEnd.X < 0.001m);
+            Assert.IsTrue(deltaEnd.Y < 0.001m);
         }
     }
 }

@@ -40,15 +40,21 @@ namespace MachineLearningPractice.Models
             }
         }
 
-        public Line Rotate(decimal angleInDegrees) {
-            return new Line() {
+        public Line RotateAround(Point origin, decimal angleInDegrees)
+        {
+            return new Line()
+            {
                 Start = Start.RotateAround(
-                    Center,
+                    origin,
                     angleInDegrees),
                 End = End.RotateAround(
-                    Center,
+                    origin,
                     angleInDegrees)
             };
+        }
+
+        public Line Rotate(decimal angleInDegrees) {
+            return RotateAround(Center, angleInDegrees);
         }
 
         public double GetAngleTo(Line other)

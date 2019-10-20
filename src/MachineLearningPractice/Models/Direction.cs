@@ -9,12 +9,12 @@ namespace MachineLearningPractice.Models
     public enum Direction
     {
         Top,
-        Left,
-        Right,
-        Bottom,
-        TopLeft,
         TopRight,
+        Right,
+        BottomRight,
+        Bottom,
         BottomLeft,
-        BottomRight
+        Left,
+        TopLeft
     }
 }

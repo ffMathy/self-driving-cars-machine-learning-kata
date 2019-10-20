@@ -10,7 +10,7 @@ namespace MachineLearningPractice.Models
 
     public class Car
     {
-        public const int Size = 50;
+        public const int Size = 15;
 
         public BoundingBox BoundingBox { get; }
 
@@ -26,10 +26,10 @@ namespace MachineLearningPractice.Models
                 var line = new Line()
                 {
                     Start = new Point(0, 0),
-                    End = new Point(0, 0.5m)
+                    End = new Point(0, -0.5m)
                 };
 
-                return line.Rotate(TurnAngle);
+                return line.RotateAround(new Point(), TurnAngle);
             }
         }
 
@@ -54,33 +54,42 @@ namespace MachineLearningPractice.Models
 
         public decimal Turn(decimal deltaAngle)
         {
+            var previousAngleVelocity = TurnAngleVelocity;
             TurnAngleVelocity += deltaAngle;
 
-            const int threshold = 10;
+            const int threshold = 5;
 
-            if (TurnAngleVelocity < -threshold)
+            if (TurnAngleVelocity < -threshold) { 
                 TurnAngleVelocity = -threshold;
-
-            if (TurnAngleVelocity > threshold)
+            } else if (TurnAngleVelocity > threshold) { 
                 TurnAngleVelocity = threshold;
+            }
 
-            return TurnAngleVelocity;
+            Accelerate(-Math.Abs(TurnAngleVelocity) / 1000m);
+
+            return TurnAngleVelocity - previousAngleVelocity;
         }
 
         public decimal Accelerate(decimal deltaVelocity)
         {
+            var previousSpeedVelocity = SpeedVelocity;
             SpeedVelocity += deltaVelocity;
-            
-            const int highThreshold = 10;
-            const int lowThreshold = 1;
+
+            EnsureSpeedWithinBounds();
+
+            return SpeedVelocity - previousSpeedVelocity;
+        }
+
+        private void EnsureSpeedWithinBounds()
+        {
+            const decimal highThreshold = 5;
+            const decimal lowThreshold = 1m;
 
             if (SpeedVelocity < lowThreshold)
                 SpeedVelocity = lowThreshold;
 
             if (SpeedVelocity > highThreshold)
                 SpeedVelocity = highThreshold;
-
-            return SpeedVelocity;
         }
 
         public void Tick()

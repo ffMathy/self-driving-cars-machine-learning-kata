@@ -28,6 +28,13 @@ namespace MachineLearningPractice.Helpers
             }
         }
 
+        public static decimal GetClockwiseAngleBetweenDirections(
+            Direction a,
+            Direction b)
+        {           
+            return (((int)b - (int)a) % 8) * 45;
+        }
+
         public static Direction GetCombinedDirection(
             Direction a,
             Direction b)
@@ -39,10 +46,10 @@ namespace MachineLearningPractice.Helpers
                 switch(b)
                 {
                     case Direction.Bottom:
-                        return Direction.BottomRight;
+                        return Direction.BottomLeft;
 
                     case Direction.Top:
-                        return Direction.TopRight;
+                        return Direction.TopLeft;
                 }
             }
 
@@ -51,26 +58,14 @@ namespace MachineLearningPractice.Helpers
                 switch (b)
                 {
                     case Direction.Bottom:
-                        return Direction.BottomLeft;
+                        return Direction.BottomRight;
 
                     case Direction.Top:
-                        return Direction.TopLeft;
+                        return Direction.TopRight;
                 }
             }
 
             if (a == Direction.Top)
-            {
-                switch (b)
-                {
-                    case Direction.Left:
-                        return Direction.BottomLeft;
-
-                    case Direction.Right:
-                        return Direction.BottomRight;
-                }
-            }
-
-            if (a == Direction.Bottom)
             {
                 switch (b)
                 {
@@ -82,7 +77,19 @@ namespace MachineLearningPractice.Helpers
                 }
             }
 
-            return GetCombinedDirection(b, a);
+            if (a == Direction.Bottom)
+            {
+                switch (b)
+                {
+                    case Direction.Left:
+                        return Direction.BottomLeft;
+
+                    case Direction.Right:
+                        return Direction.BottomRight;
+                }
+            }
+
+            throw new InvalidOperationException("Unknown combined direction.");
         }
 
         public Direction GetRandomDirection()
@@ -152,9 +159,9 @@ namespace MachineLearningPractice.Helpers
         {
             return direction switch
             {
-                Direction.Bottom => new Point(0, -1),
+                Direction.Bottom => new Point(0, 1),
                 Direction.Left => new Point(-1, 0),
-                Direction.Top => new Point(0, 1),
+                Direction.Top => new Point(0, -1),
                 Direction.Right => new Point(1, 0),
 
                 _ => throw new ArgumentOutOfRangeException(nameof(direction)),
