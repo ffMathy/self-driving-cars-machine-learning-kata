@@ -17,27 +17,57 @@ namespace MachineLearningPractice.Models
 
     public struct Line
     {
-        public Point Start { get; set; }
-        public Point End { get; set; }
+        private Point start;
+        private Point end;
 
-        public Point Center => new Point(
-            Start.X + (End.X - Start.X) / 2,
-            Start.Y + (End.Y - Start.Y) / 2);
-
-        public LineFormula Formula
+        public Point Start
         {
-            get
+            get => start;
+            set
             {
-                var a = End.Y - Start.Y;
-                var b = Start.X - End.X;
-
-                return new LineFormula()
-                {
-                    A = a,
-                    B = b,
-                    C = (a * Start.X) + (b * Start.Y)
-                };
+                start = value;
+                RecalculateValues();
             }
+        }
+
+        public Point End
+        {
+            get => end;
+            set
+            {
+                end = value;
+                RecalculateValues();
+            }
+        }
+
+        public Point Center { get; private set; }
+
+        public LineFormula Formula { get; private set; }
+
+        private void RecalculateValues()
+        {
+            RecalculateFormula();
+            RecalculateCenter();
+        }
+
+        private void RecalculateCenter()
+        {
+            Center = new Point(
+               Start.X + (End.X - Start.X) / 2,
+               Start.Y + (End.Y - Start.Y) / 2);
+        }
+
+        private void RecalculateFormula()
+        {
+            var a = End.Y - Start.Y;
+            var b = Start.X - End.X;
+
+            Formula = new LineFormula()
+            {
+                A = a,
+                B = b,
+                C = (a * Start.X) + (b * Start.Y)
+            };
         }
 
         public Line RotateAround(Point origin, decimal angleInDegrees)
@@ -53,14 +83,15 @@ namespace MachineLearningPractice.Models
             };
         }
 
-        public Line Rotate(decimal angleInDegrees) {
+        public Line Rotate(decimal angleInDegrees)
+        {
             return RotateAround(Center, angleInDegrees);
         }
 
         public double GetAngleTo(Line other)
         {
             var theta1 = Math.Atan2(
-                (double)this.Start.Y - (double)this.End.Y, 
+                (double)this.Start.Y - (double)this.End.Y,
                 (double)this.Start.X - (double)this.End.X);
 
             var theta2 = Math.Atan2(
@@ -78,7 +109,7 @@ namespace MachineLearningPractice.Models
         public Point? GetIntersectionPointWith(Line other)
         {
             var delta = (this.Formula.A * other.Formula.B) - (other.Formula.A * this.Formula.B);
-            if(delta == 0)
+            if (delta == 0)
                 return null;
 
             var point = new Point()
@@ -92,7 +123,8 @@ namespace MachineLearningPractice.Models
 
         public static Line operator *(Line a, int b)
         {
-            return new Line() {
+            return new Line()
+            {
                 Start = a.Start * b,
                 End = a.End * b
             };
@@ -107,7 +139,8 @@ namespace MachineLearningPractice.Models
             };
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return "<" + Start + ":" + End + ">";
         }
     }

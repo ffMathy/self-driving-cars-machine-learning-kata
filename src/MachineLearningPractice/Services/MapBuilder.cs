@@ -46,7 +46,8 @@ namespace MachineLearningPractice.Services
 
         public Map Build()
         {
-            var currentNode = nodes.FirstOrDefault();
+            var firstNode = nodes.FirstOrDefault();
+            var currentNode = firstNode;
             var currentProgressLine = currentNode
                 ?.ProgressLines
                 ?.OrderBy(x => x.Line.Center.GetDistanceTo(currentNode.Position))
@@ -64,9 +65,19 @@ namespace MachineLearningPractice.Services
                 foreach (var nodeProgressLine in nodeProgressLines)
                 {
                     nodeProgressLine.Offset = progressLineOffset++;
+                    nodeProgressLine.MapNode = currentNode;
                 }
 
-                currentNode = nodes.SingleOrDefault(x => x.Offset == currentNode.Offset + 1);
+                foreach(var wallLine in currentNode.WallLines)
+                {
+                    wallLine.MapNode = currentNode;
+                }
+
+                var nextNode = nodes.SingleOrDefault(x => x.Offset == currentNode.Offset + 1);
+                currentNode.Next = nextNode ?? firstNode;
+                currentNode.Next.Previous = currentNode;
+
+                currentNode = nextNode;
             }
 
             return new Map()
@@ -92,7 +103,6 @@ namespace MachineLearningPractice.Services
                 EntranceDirection = entranceDirection,
                 ExitDirection = exitDirection,
                 ProgressLines = GetProgressLines(
-                    offset,
                     origin,
                     entranceDirection,
                     exitDirection),
@@ -133,7 +143,6 @@ namespace MachineLearningPractice.Services
         }
 
         private static ProgressLine[] GetProgressLines(
-            int offset,
             Point origin,
             Direction entranceDirection,
             Direction exitDirection)
@@ -147,42 +156,42 @@ namespace MachineLearningPractice.Services
             switch (combinedDirection)
             {
                 case Direction.Right:
-                    lines.AddRange(GetRightProgressLines(offset, origin));
+                    lines.AddRange(GetRightProgressLines(origin));
                     break;
 
                 case Direction.Left:
-                    lines.AddRange(GetLeftProgressLines(offset, origin));
+                    lines.AddRange(GetLeftProgressLines(origin));
                     break;
 
                 case Direction.Top:
-                    lines.AddRange(GetTopProgressLines(offset, origin));
+                    lines.AddRange(GetTopProgressLines(origin));
                     break;
 
                 case Direction.Bottom:
-                    lines.AddRange(GetBottomProgressLines(offset, origin));
+                    lines.AddRange(GetBottomProgressLines(origin));
                     break;
 
                 case Direction.BottomLeft:
-                    lines.AddRange(GetBottomLeftProgressLines(offset, origin));
+                    lines.AddRange(GetBottomLeftProgressLines(origin));
                     break;
 
                 case Direction.BottomRight:
-                    lines.AddRange(GetBottomRightProgressLines(offset, origin));
+                    lines.AddRange(GetBottomRightProgressLines(origin));
                     break;
 
                 case Direction.TopLeft:
-                    lines.AddRange(GetTopLeftProgressLines(offset, origin));
+                    lines.AddRange(GetTopLeftProgressLines(origin));
                     break;
 
                 case Direction.TopRight:
-                    lines.AddRange(GetTopRightProgressLines(offset, origin));
+                    lines.AddRange(GetTopRightProgressLines(origin));
                     break;
             }
 
             return lines.ToArray();
         }
 
-        private static ProgressLine[] GetLeftProgressLines(int offset, Point origin)
+        private static ProgressLine[] GetLeftProgressLines(Point origin)
         {
             var progressLines = GetAngledStraightProgressLines(origin, Direction.Left)
                 .Select(x => new ProgressLine()
@@ -194,7 +203,7 @@ namespace MachineLearningPractice.Services
             return progressLines;
         }
 
-        private static ProgressLine[] GetRightProgressLines(int offset, Point origin)
+        private static ProgressLine[] GetRightProgressLines(Point origin)
         {
             var progressLines = GetAngledStraightProgressLines(origin, Direction.Right)
                 .Select(x => new ProgressLine()
@@ -206,7 +215,7 @@ namespace MachineLearningPractice.Services
             return progressLines;
         }
 
-        private static ProgressLine[] GetBottomProgressLines(int offset, Point origin)
+        private static ProgressLine[] GetBottomProgressLines(Point origin)
         {
             var progressLines = GetAngledStraightProgressLines(origin, Direction.Bottom)
                 .Select(x => new ProgressLine()
@@ -218,7 +227,7 @@ namespace MachineLearningPractice.Services
             return progressLines;
         }
 
-        private static ProgressLine[] GetTopProgressLines(int offset, Point origin)
+        private static ProgressLine[] GetTopProgressLines(Point origin)
         {
             var progressLines = GetAngledStraightProgressLines(origin, Direction.Top)
                 .Select(x => new ProgressLine()
@@ -263,7 +272,7 @@ namespace MachineLearningPractice.Services
                 .ToArray();
         }
 
-        private static ProgressLine[] GetBottomRightProgressLines(int offset, Point origin)
+        private static ProgressLine[] GetBottomRightProgressLines(Point origin)
         {
             var progressLines = GetAngledCornerProgressLines(origin, Direction.BottomRight)
                 .Select(x => new ProgressLine()
@@ -275,7 +284,7 @@ namespace MachineLearningPractice.Services
             return progressLines;
         }
 
-        private static ProgressLine[] GetTopLeftProgressLines(int offset, Point origin)
+        private static ProgressLine[] GetTopLeftProgressLines(Point origin)
         {
             var progressLines = GetAngledCornerProgressLines(origin, Direction.TopLeft)
                 .Select(x => new ProgressLine()
@@ -319,7 +328,7 @@ namespace MachineLearningPractice.Services
                 .ToArray();
         }
 
-        private static ProgressLine[] GetBottomLeftProgressLines(int offset, Point origin)
+        private static ProgressLine[] GetBottomLeftProgressLines(Point origin)
         {
             var progressLines = GetAngledCornerProgressLines(origin, Direction.BottomLeft)
                 .Select(x => new ProgressLine()
@@ -331,7 +340,7 @@ namespace MachineLearningPractice.Services
             return progressLines;
         }
 
-        private static ProgressLine[] GetTopRightProgressLines(int offset, Point origin)
+        private static ProgressLine[] GetTopRightProgressLines(Point origin)
         {
             var progressLines = GetAngledCornerProgressLines(origin, Direction.TopRight)
                 .Select(x => new ProgressLine()

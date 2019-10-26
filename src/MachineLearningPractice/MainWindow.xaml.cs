@@ -3,6 +3,7 @@ using MachineLearningPractice.Models;
 using MachineLearningPractice.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,13 +29,14 @@ namespace MachineLearningPractice
         private readonly DirectionHelper directionHelper;
 
         private bool keepRunning;
-        private ulong tick;
         private int generation;
 
         private Map map;
-        private List<CarSimulation> simulations;
 
+        private List<CarSimulation> simulations;
         private List<CarSimulation> currentBestSimulationsInGeneration;
+
+        private HashSet<UIElement> renderedObjects;
 
         public MainWindow()
         {
@@ -42,6 +44,7 @@ namespace MachineLearningPractice
             this.carNeuralNetwork = new CarNeuralNetwork();
             this.directionHelper = new DirectionHelper(this.random);
             this.currentBestSimulationsInGeneration = new List<CarSimulation>();
+            this.renderedObjects = new HashSet<UIElement>();
 
             InitializeComponent();
             GenerateNewMap();
@@ -50,7 +53,7 @@ namespace MachineLearningPractice
 
         private void LoadSimulations()
         {
-            const int simulationCount = 50;
+            const int simulationCount = 100;
 
             simulations = new List<CarSimulation>();
             for (var i = 0; i < simulationCount; i++)
@@ -59,7 +62,7 @@ namespace MachineLearningPractice
                     random,
                     map,
                     carNeuralNetwork,
-                    i == 0 && generation > 0 ? 0m : 3m));
+                    i == 0 || generation > 0 ? 0m : 0.5m));
             }
         }
 
@@ -72,7 +75,7 @@ namespace MachineLearningPractice
         {
             do
             {
-                await TrainGeneration(10);
+                await TrainGeneration(1);
             } while (keepRunning);
         }
 
@@ -101,6 +104,19 @@ namespace MachineLearningPractice
             generation++;
         }
 
+        private void ParallelizeForIf<T>(bool condition, IEnumerable<T> enumerable, Action<T> action)
+        {
+            if(condition) { 
+                Parallel.ForEach(enumerable, action);
+            } else
+            {
+                foreach(var item in enumerable)
+                {
+                    action(item);
+                }
+            }
+        }
+
         private async Task RunSingleGeneration(List<CarSimulation> simulations, int tickDelay)
         {
             foreach (var simulation in simulations)
@@ -109,18 +125,21 @@ namespace MachineLearningPractice
             }
 
             var crashedCount = 0;
+            var isSlow = generation % 10 == 1 && tickDelay > 0;
+
+            ClearCanvas();
+
+            var ticks = 0L;
+            var stopwatch = Stopwatch.StartNew();
             while (crashedCount < simulations.Count)
             {
-                tick++;
+                ticks++;
 
-                if (tickDelay > 0)
-                {
+                var shouldSkipRender = !isSlow && stopwatch.ElapsedMilliseconds < 10000;
+                if (!shouldSkipRender)
                     ClearCanvas();
-                    RenderMap();
-                }
 
-                foreach (var simulation in simulations)
-                {
+                ParallelizeForIf(shouldSkipRender, simulations, simulation => { 
                     if (!simulation.IsCrashed)
                     {
                         simulation.Tick();
@@ -128,19 +147,31 @@ namespace MachineLearningPractice
                             crashedCount++;
                     }
 
-                    if (tickDelay > 0)
-                        RenderCarSimulation(simulation);
-                }
+                    if (!shouldSkipRender)
+                        RenderCarSimulation(simulation, !isSlow);
+                });
 
-                const int amountOfBestGenerations = 2;
+                var amountOfBestGenerationsToPick = simulations.Count / 10;
 
                 currentBestSimulationsInGeneration = simulations
                     .OrderBy(x => x.Fitness)
-                    .Take(amountOfBestGenerations)
+                    .Take(amountOfBestGenerationsToPick)
                     .ToList();
 
-                if (tickDelay > 0)
+                if (!shouldSkipRender)
                     await Task.Delay(tickDelay);
+            }
+
+            stopwatch.Stop();
+
+            if (!isSlow)
+            {
+                foreach (var simulation in simulations)
+                {
+                    RenderCarSimulation(simulation, false);
+                }
+
+                await Task.Delay(100);
             }
         }
 
@@ -158,7 +189,10 @@ namespace MachineLearningPractice
 
         private void ClearCanvas()
         {
-            MapCanvas.Children.Clear();
+            foreach (var element in renderedObjects)
+                MapCanvas.Children.Remove(element);
+
+            renderedObjects.Clear();
         }
 
         private void RenderMap()
@@ -169,7 +203,13 @@ namespace MachineLearningPractice
             }
         }
 
-        private void RenderCarSimulation(CarSimulation carSimulation)
+        private void Render(UIElement element)
+        {
+            renderedObjects.Add(element);
+            MapCanvas.Children.Add(element);
+        }
+
+        private void RenderCarSimulation(CarSimulation carSimulation, bool shouldUseFastRender)
         {
             var car = carSimulation.Car;
 
@@ -178,9 +218,16 @@ namespace MachineLearningPractice
             {
                 color = Brushes.Blue;
             }
+            else if (carSimulation.RandomnessFactor == 0)
+            {
+                color = Brushes.Purple;
+            }
             else if (carSimulation.IsCrashed)
             {
                 color = Brushes.Red;
+
+                if (shouldUseFastRender)
+                    return;
             }
 
             var ellipse = new Ellipse()
@@ -192,7 +239,7 @@ namespace MachineLearningPractice
                 StrokeThickness = 3,
                 Opacity = 1
             };
-            MapCanvas.Children.Add(ellipse);
+            Render(ellipse);
 
             Canvas.SetLeft(ellipse, (double)car.BoundingBox.Location.X);
             Canvas.SetTop(ellipse, (double)car.BoundingBox.Location.Y);
@@ -200,29 +247,30 @@ namespace MachineLearningPractice
             if (carSimulation.IsCrashed)
                 return;
 
-            //RenderTextBlock(car.BoundingBox.Center, 0.25, carSimulation.Fitness.ToString());
-
-            var line = new System.Windows.Shapes.Line()
+            if (!shouldUseFastRender)
             {
-                X1 = (double)car.BoundingBox.Center.X,
-                Y1 = (double)car.BoundingBox.Center.Y,
-                X2 = (double)car.BoundingBox.Center.X + ((double)car.ForwardDirectionLine.End.X * (double)car.BoundingBox.Size.Width),
-                Y2 = (double)car.BoundingBox.Center.Y + ((double)car.ForwardDirectionLine.End.Y * (double)car.BoundingBox.Size.Height),
-                Stroke = Brushes.Blue,
-                StrokeDashOffset = 2,
-                StrokeThickness = 2
-            };
-            MapCanvas.Children.Add(line);
+                var line = new System.Windows.Shapes.Line()
+                {
+                    X1 = (double)car.BoundingBox.Center.X,
+                    Y1 = (double)car.BoundingBox.Center.Y,
+                    X2 = (double)car.BoundingBox.Center.X + ((double)car.ForwardDirectionLine.End.X * (double)car.BoundingBox.Size.Width),
+                    Y2 = (double)car.BoundingBox.Center.Y + ((double)car.ForwardDirectionLine.End.Y * (double)car.BoundingBox.Size.Height),
+                    Stroke = Brushes.Blue,
+                    StrokeDashOffset = 2,
+                    StrokeThickness = 2
+                };
+                Render(line);
 
-            RenderCarSimulationSensorReadings(carSimulation);
+                RenderCarSimulationSensorReadings(carSimulation);
+            }
         }
 
         private void RenderCarSimulationSensorReadings(CarSimulation carSimulation)
         {
-            if (carSimulation.IsCrashed || true)
+            if (carSimulation.IsCrashed)
                 return;
 
-            var sensorReadings = carSimulation.GetSensorReadings();
+            var sensorReadings = carSimulation.SensorReadings;
             var sensorReadingsArray = new[]
             {
                 sensorReadings.LeftSensor,
@@ -247,7 +295,7 @@ namespace MachineLearningPractice
                     StrokeThickness = 1
                 };
 
-                MapCanvas.Children.Add(sensorLine);
+                Render(sensorLine);
             }
         }
 
@@ -285,7 +333,7 @@ namespace MachineLearningPractice
                 StrokeThickness = 2
             });
 
-            if(annotation != null)
+            if (annotation != null)
             {
                 RenderTextBlock(line.Center, opacity, annotation);
             }
@@ -310,7 +358,7 @@ namespace MachineLearningPractice
 
         private async void TrainMultipleGenerationsButton_Click(object sender, RoutedEventArgs e)
         {
-            for (var i = 0; i < 50; i++)
+            for (var i = 0; i < 3; i++)
             {
                 await TrainGeneration(0);
             }

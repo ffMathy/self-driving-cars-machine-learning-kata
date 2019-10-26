@@ -11,12 +11,14 @@ namespace MachineLearningPractice.Models
     {
         public Line Line { get; set; }
         public int Offset { get; set; }
+        public MapNode MapNode { get; set; }
     }
 
     public class WallLine
     {
         public Line Line { get; set; }
-        public Direction Direction { get;set;}
+        public Direction Direction { get; set; }
+        public MapNode MapNode { get; set; }
     }
 
     public class MapNode
@@ -30,6 +32,10 @@ namespace MachineLearningPractice.Models
 
         public WallLine[] WallLines { get; set; }
         public WallLine[] OpeningLines { get; set; }
+
+        public MapNode Next { get; set; }
+
+        public MapNode Previous { get; set; }
 
         public int Offset { get; set; }
     }

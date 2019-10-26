@@ -10,7 +10,7 @@ namespace MachineLearningPractice.Models
 
     public class Car
     {
-        public const int Size = 15;
+        public const int Size = 20;
 
         public BoundingBox BoundingBox { get; }
 
@@ -65,7 +65,7 @@ namespace MachineLearningPractice.Models
                 TurnAngleVelocity = threshold;
             }
 
-            Accelerate(-Math.Abs(TurnAngleVelocity) / 1000m);
+            Accelerate(-Math.Abs(TurnAngleVelocity) / 500m);
 
             return TurnAngleVelocity - previousAngleVelocity;
         }
