@@ -34,14 +34,14 @@ namespace MachineLearningPractice
         private Map map;
         private List<CarSimulation> simulations;
 
-        private CarSimulation previousBestSimulationInGeneration;
-        private CarSimulation currentBestSimulationInGeneration;
+        private List<CarSimulation> currentBestSimulationsInGeneration;
 
         public MainWindow()
         {
             this.random = new Random();
             this.carNeuralNetwork = new CarNeuralNetwork();
             this.directionHelper = new DirectionHelper(this.random);
+            this.currentBestSimulationsInGeneration = new List<CarSimulation>();
 
             InitializeComponent();
             GenerateNewMap();
@@ -84,12 +84,12 @@ namespace MachineLearningPractice
 
         private void TrainPendingInstructionsFromBestGeneration()
         {
-            //if (previousBestSimulationInGeneration != null && currentBestSimulationInGeneration.Fitness > previousBestSimulationInGeneration.Fitness)
-            //    return;
+            var instructions = currentBestSimulationsInGeneration
+                .SelectMany(x => x
+                    .PendingTrainingInstructions
+                    .Take(x.PendingTrainingInstructions.Count / currentBestSimulationsInGeneration.Count));
 
-            //previousBestSimulationInGeneration = currentBestSimulationInGeneration;
-
-            foreach (var pendingTrainingInstruction in currentBestSimulationInGeneration.PendingTrainingInstructions)
+            foreach (var pendingTrainingInstruction in instructions)
             {
                 carNeuralNetwork.Record(
                     pendingTrainingInstruction.CarSensorReading,
@@ -132,9 +132,12 @@ namespace MachineLearningPractice
                         RenderCarSimulation(simulation);
                 }
 
-                currentBestSimulationInGeneration = simulations.OrderBy(x => x.Fitness).First();
+                const int amountOfBestGenerations = 2;
 
-                Title = currentBestSimulationInGeneration.CurrentProgressLine.Offset + "";
+                currentBestSimulationsInGeneration = simulations
+                    .OrderBy(x => x.Fitness)
+                    .Take(amountOfBestGenerations)
+                    .ToList();
 
                 if (tickDelay > 0)
                     await Task.Delay(tickDelay);
@@ -171,7 +174,7 @@ namespace MachineLearningPractice
             var car = carSimulation.Car;
 
             var color = Brushes.Green;
-            if (carSimulation == currentBestSimulationInGeneration)
+            if (currentBestSimulationsInGeneration.Contains(carSimulation))
             {
                 color = Brushes.Blue;
             }
@@ -197,7 +200,7 @@ namespace MachineLearningPractice
             if (carSimulation.IsCrashed)
                 return;
 
-            RenderTextBlock(car.BoundingBox.Center, 0.25, carSimulation.Fitness.ToString());
+            //RenderTextBlock(car.BoundingBox.Center, 0.25, carSimulation.Fitness.ToString());
 
             var line = new System.Windows.Shapes.Line()
             {

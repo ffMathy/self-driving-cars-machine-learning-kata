@@ -33,7 +33,7 @@ namespace MachineLearningPractice.Services
         private readonly Map map;
         private readonly CarNeuralNetwork carNeuralNetwork;
 
-        private readonly IList<CarSimulationTick> pendingTrainingInstructions;
+        private readonly HashSet<CarSimulationTick> pendingTrainingInstructions;
         private readonly IList<ProgressLine> allProgressLines;
 
         private readonly decimal randomnessFactor;
@@ -71,7 +71,7 @@ namespace MachineLearningPractice.Services
 
         public Car Car => car;
 
-        public IReadOnlyList<CarSimulationTick> PendingTrainingInstructions => pendingTrainingInstructions.ToArray();
+        public HashSet<CarSimulationTick> PendingTrainingInstructions => pendingTrainingInstructions;
 
         public bool IsCrashed => isCrashed;
 
@@ -91,7 +91,7 @@ namespace MachineLearningPractice.Services
 
             this.car = new Car();
 
-            this.pendingTrainingInstructions = new List<CarSimulationTick>();
+            this.pendingTrainingInstructions = new HashSet<CarSimulationTick>();
 
             this.random = random;
             this.map = map;
