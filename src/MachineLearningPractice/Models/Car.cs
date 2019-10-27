@@ -76,7 +76,7 @@ namespace MachineLearningPractice.Models
         public decimal Accelerate(decimal deltaVelocity)
         {
             var previousSpeedVelocity = SpeedVelocity;
-            SpeedVelocity += deltaVelocity;
+            SpeedVelocity += deltaVelocity / 2m;
 
             EnsureSpeedWithinBounds();
 

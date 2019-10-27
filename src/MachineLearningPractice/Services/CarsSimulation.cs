@@ -8,7 +8,7 @@ namespace MachineLearningPractice.Services
 {
     class CarsSimulation
     {
-        const int SimulationCount = 100;
+        const int SimulationCount = 30;
         const int SimulationAmountToKeepEachGeneration = SimulationCount / 10;
 
         private readonly Map map;

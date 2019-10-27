@@ -43,7 +43,8 @@ namespace MachineLearningPractice.Services
 
             this.hasTrained = network != null;
 
-            this.network = network ?? new ActivationNetwork(new ThresholdFunction(), 3, 4, 4, 2);
+            //this.network = network ?? new ActivationNetwork(new ThresholdFunction(), 3, 4, 4, 2);
+            this.network = network ?? new ActivationNetwork(new ThresholdFunction(), 3, 6, 2);
             this.teacher = new BackPropagationLearning(this.network);
         }
 

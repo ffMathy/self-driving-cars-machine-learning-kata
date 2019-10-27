@@ -74,17 +74,15 @@ namespace MachineLearningPractice
 
         private void RunSingleGeneration(int tickDelay)
         {
-            var isSlow = carsSimulation.CurrentGeneration % 10 == 9 && tickDelay > 0;
+            var isSlow = carsSimulation.CurrentGeneration % 30 == 29 && tickDelay > 0;
 
             var stopwatch = Stopwatch.StartNew();
-
-            ClearCanvas();
 
             carsSimulation.SimulateWholeGeneration(() =>
             {
                 DoEvents();
 
-                var shouldSkipRender = !isSlow && stopwatch.ElapsedMilliseconds < 10000;
+                var shouldSkipRender = !isSlow && stopwatch.ElapsedMilliseconds < 60_000;
                 if (shouldSkipRender)
                     return;
 
@@ -98,8 +96,12 @@ namespace MachineLearningPractice
 
             stopwatch.Stop();
 
+            Title = carsSimulation.CurrentGeneration + "";
+
             if (!isSlow)
             {
+                ClearCanvas();
+
                 foreach (var simulation in carsSimulation.AllSimulations)
                     RenderCarSimulation(simulation, false);
 

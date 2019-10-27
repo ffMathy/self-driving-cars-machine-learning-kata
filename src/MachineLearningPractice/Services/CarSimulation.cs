@@ -38,6 +38,9 @@ namespace MachineLearningPractice.Services
         private int laps;
         private int lastProgressLineOffset;
 
+        private long lastProgressLineIncreaseTick;
+        private int highestProgressLineOffset;
+
         public long TicksSurvived { get; private set; }
 
         public ProgressLine CurrentProgressLine { get; private set; }
@@ -117,6 +120,12 @@ namespace MachineLearningPractice.Services
             if (previousProgressLine == null || Math.Abs(newProgressLine.Offset - previousProgressLine.Offset) < 3)
                 CurrentProgressLine = newProgressLine;
 
+            if (newProgressLine.Offset > highestProgressLineOffset)
+            {
+                lastProgressLineIncreaseTick = TicksSurvived;
+                highestProgressLineOffset = newProgressLine.Offset;
+            }
+
             if (previousProgressLine != null)
             {
                 if (CurrentProgressLine.Offset == 0 && previousProgressLine.Offset == lastProgressLineOffset)
@@ -138,6 +147,15 @@ namespace MachineLearningPractice.Services
             TicksSurvived++;
 
             CalculateFitness();
+
+            if(lastProgressLineIncreaseTick != 0) { 
+                var timeSinceLastProgressLineIncrease = TicksSurvived - lastProgressLineIncreaseTick;
+                if(timeSinceLastProgressLineIncrease > 600)
+                {
+                    IsCrashed = true;
+                    return;
+                }
+            }
 
             if (Fitness > 3000)
             {
