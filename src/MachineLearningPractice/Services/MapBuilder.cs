@@ -117,9 +117,8 @@ namespace MachineLearningPractice.Services
                 BoundingBox = new BoundingBox()
                 {
                     Location = new Point(
-                        (decimal)Map.TileSize,
-                        origin.X - (decimal)Map.TileSize / 2,
-                        origin.Y - (decimal)Map.TileSize / 2),
+                        ((decimal)Map.TileSize * origin.X) - (decimal)Map.TileSize / 2,
+                        ((decimal)Map.TileSize * origin.Y) - (decimal)Map.TileSize / 2),
                     Size = new Size()
                     {
                         Width = (decimal)Map.TileSize,
