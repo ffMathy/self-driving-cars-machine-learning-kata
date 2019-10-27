@@ -54,14 +54,8 @@ namespace MachineLearningPractice
         {
             do
             {
-                TrainGeneration(1);
+                RunSingleGeneration(1);
             } while (keepRunning);
-        }
-
-        private void TrainGeneration(int tickDelay)
-        {
-            RunSingleGeneration(tickDelay);
-            //TrainPendingInstructionsFromBestGeneration();
         }
 
         private static void DoEvents()
@@ -69,35 +63,37 @@ namespace MachineLearningPractice
             var frame = new DispatcherFrame();
             Dispatcher.CurrentDispatcher.BeginInvoke(
                 DispatcherPriority.Background,
-                new DispatcherOperationCallback(f => {
+                new DispatcherOperationCallback(f =>
+                {
                     ((DispatcherFrame)f).Continue = false;
                     return null;
-                }), 
+                }),
                 frame);
             Dispatcher.PushFrame(frame);
         }
 
         private void RunSingleGeneration(int tickDelay)
         {
-            //var isSlow = generation % 10 == 1 && tickDelay > 0;
-            var isSlow = true;
+            var isSlow = carsSimulation.CurrentGeneration % 10 == 9 && tickDelay > 0;
 
             var stopwatch = Stopwatch.StartNew();
 
             ClearCanvas();
 
-            carsSimulation.SimulateWholeGeneration(() => { 
+            carsSimulation.SimulateWholeGeneration(() =>
+            {
+                DoEvents();
+
                 var shouldSkipRender = !isSlow && stopwatch.ElapsedMilliseconds < 10000;
                 if (shouldSkipRender)
                     return;
 
                 ClearCanvas();
 
-                foreach(var simulation in carsSimulation.AllSimulations)
+                foreach (var simulation in carsSimulation.AllSimulations)
                     RenderCarSimulation(simulation, shouldSkipRender);
 
                 Thread.Sleep(tickDelay);
-                DoEvents();
             });
 
             stopwatch.Stop();
@@ -107,8 +103,11 @@ namespace MachineLearningPractice
                 foreach (var simulation in carsSimulation.AllSimulations)
                     RenderCarSimulation(simulation, false);
 
-                DoEvents();
-                Thread.Sleep(500);
+                if (tickDelay > 0)
+                {
+                    DoEvents();
+                    Thread.Sleep(500);
+                }
             }
         }
 
@@ -286,7 +285,7 @@ namespace MachineLearningPractice
         {
             for (var i = 0; i < 3; i++)
             {
-                TrainGeneration(0);
+                RunSingleGeneration(0);
             }
 
             TrainGenerationButton_Click(sender, e);

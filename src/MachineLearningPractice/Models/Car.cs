@@ -10,7 +10,7 @@ namespace MachineLearningPractice.Models
 
     public class Car
     {
-        public const int Size = 20;
+        public const int Size = 30;
 
         public BoundingBox BoundingBox { get; }
 
@@ -59,7 +59,7 @@ namespace MachineLearningPractice.Models
             var previousAngleVelocity = TurnAngleVelocity;
             TurnAngleVelocity += deltaAngle;
 
-            const int threshold = 2;
+            const int threshold = 5;
 
             if (TurnAngleVelocity < -threshold) { 
                 TurnAngleVelocity = -threshold;
@@ -67,9 +67,10 @@ namespace MachineLearningPractice.Models
                 TurnAngleVelocity = threshold;
             }
 
-            Accelerate(-Math.Abs(TurnAngleVelocity) / 2000m);
+            var delta = TurnAngleVelocity - previousAngleVelocity;
+            Accelerate(-Math.Abs(delta) / 1000m);
 
-            return TurnAngleVelocity - previousAngleVelocity;
+            return delta;
         }
 
         public decimal Accelerate(decimal deltaVelocity)
@@ -84,7 +85,7 @@ namespace MachineLearningPractice.Models
 
         private void EnsureSpeedWithinBounds()
         {
-            const decimal highThreshold = 5;
+            const decimal highThreshold = 10;
             const decimal lowThreshold = 1m;
 
             if (SpeedVelocity < lowThreshold)

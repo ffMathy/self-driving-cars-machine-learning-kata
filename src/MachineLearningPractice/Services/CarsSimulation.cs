@@ -8,7 +8,7 @@ namespace MachineLearningPractice.Services
 {
     class CarsSimulation
     {
-        const int SimulationCount = 20;
+        const int SimulationCount = 100;
         const int SimulationAmountToKeepEachGeneration = SimulationCount / 10;
 
         private readonly Map map;
@@ -48,7 +48,15 @@ namespace MachineLearningPractice.Services
 
         private void AddNewSimulation(CarSimulation simulation)
         {
-            AliveSimulations.Add(simulation);
+            if (simulation.IsCrashed)
+            {
+                CrashedSimulations.Add(simulation);
+            }
+            else
+            {
+                AliveSimulations.Add(simulation);
+            }
+
             AllSimulations.Add(simulation);
         }
 
@@ -117,7 +125,8 @@ namespace MachineLearningPractice.Services
                     newlyCrashedSimulations.Add(simulation);
             }
 
-            foreach(var simulation in newlyCrashedSimulations) { 
+            foreach (var simulation in newlyCrashedSimulations)
+            {
                 AliveSimulations.Remove(simulation);
                 CrashedSimulations.Add(simulation);
             }
@@ -125,7 +134,8 @@ namespace MachineLearningPractice.Services
 
         public void SimulateWholeGeneration(Action onPostTick = null)
         {
-            foreach (var simulation in AllSimulations) { 
+            foreach (var simulation in AllSimulations)
+            {
                 simulation.Reset();
 
                 AliveSimulations.Add(simulation);
@@ -140,24 +150,5 @@ namespace MachineLearningPractice.Services
 
             OnGenerationCompleted();
         }
-
-        //private void TrainPendingInstructionsFromBestGeneration()
-        //{
-        //    var instructions = currentBestSimulationsInGeneration
-        //        .SelectMany(x => x
-        //            .PendingTrainingInstructions
-        //            .Take(x.PendingTrainingInstructions.Count / currentBestSimulationsInGeneration.Count));
-
-        //    foreach (var pendingTrainingInstruction in instructions)
-        //    {
-        //        carNeuralNetwork.Record(
-        //            pendingTrainingInstruction.CarSensorReading,
-        //            pendingTrainingInstruction.CarResponse);
-        //    }
-
-        //    carNeuralNetwork.Train();
-
-        //    generation++;
-        //}
     }
 }
