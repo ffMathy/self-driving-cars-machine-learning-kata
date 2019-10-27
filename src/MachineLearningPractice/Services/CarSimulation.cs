@@ -33,7 +33,6 @@ namespace MachineLearningPractice.Services
         private readonly CarNeuralNetwork carNeuralNetwork;
 
         private readonly IDictionary<int, List<ProgressLine>> allProgressLinesByMapNodeOffset;
-        private readonly IDictionary<int, List<WallLine>> allWallLinesByMapNodeOffset;
 
         private int laps;
         private int lastProgressLineOffset;
@@ -77,15 +76,6 @@ namespace MachineLearningPractice.Services
                     x => x.Key,
                     x => x.ToList());
 
-            this.allWallLinesByMapNodeOffset = this.map.Nodes
-                .SelectMany(x => x.WallLines)
-                .GroupBy(x => x
-                    .MapNode
-                    .Offset)
-                .ToDictionary(
-                    x => x.Key,
-                    x => x.ToList());
-
             this.lastProgressLineOffset = allProgressLines.Last().Offset;
 
             Reset();
@@ -108,17 +98,27 @@ namespace MachineLearningPractice.Services
 
             Car.Tick();
 
-            var distanceToClosestWallPoint = GetDistanceToClosestWallLineIntersectionPoint();
-            if (distanceToClosestWallPoint < Car.Size / 2)
-            {
-                IsCrashed = true;
-                return;
-            }
-
             var previousProgressLine = CurrentProgressLine;
             var newProgressLine = GetClosestIntersectionPointProgressLine();
             if (previousProgressLine == null || Math.Abs(newProgressLine.Offset - previousProgressLine.Offset) < 3)
                 CurrentProgressLine = newProgressLine;
+
+            var mapNodes = new []
+            {
+                CurrentMapNode,
+                CurrentMapNode.Previous,
+                CurrentMapNode.Next
+            };
+
+            var isWithinAnyNode = mapNodes.Any(x => 
+                Car.BoundingBox.IsWithin(
+                    x.BoundingBox));
+
+            if (!isWithinAnyNode)
+            {
+                IsCrashed = true;
+                return;
+            }
 
             if (newProgressLine.Offset > highestProgressLineOffset)
             {
@@ -220,23 +220,6 @@ namespace MachineLearningPractice.Services
                         Car.BoundingBox.Center,
                         progressLine.Line)
                     .GetDistanceTo(Car.BoundingBox.Center))
-                .First();
-        }
-
-        private double GetDistanceToClosestWallLineIntersectionPoint()
-        {
-            var before = allWallLinesByMapNodeOffset[CurrentMapNode.Previous.Offset];
-            var current = allWallLinesByMapNodeOffset[CurrentMapNode.Offset];
-            var after = allWallLinesByMapNodeOffset[CurrentMapNode.Next.Offset];
-
-            var lines = before.Union(current).Union(after);
-
-            return lines
-                .Select(wallLine => DistanceHelper.FindClosestPointOnLine(
-                    Car.BoundingBox.Center,
-                    wallLine.Line))
-                .Select(x => x.GetDistanceTo(Car.BoundingBox.Center))
-                .OrderBy(x => x)
                 .First();
         }
 

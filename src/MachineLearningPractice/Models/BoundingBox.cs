@@ -17,6 +17,15 @@ namespace MachineLearningPractice.Models
 
         public Point Location { get; set; }
 
+        public bool IsWithin(BoundingBox other)
+        {
+            return 
+                Location.X > other.Location.X &&
+                Location.Y > other.Location.Y &&
+                Location.X + Size.Width < other.Location.X + other.Size.Width &&
+                Location.Y + Size.Height < other.Location.Y + other.Size.Height;
+        }
+
         public BoundingBox()
         {
             Location = new Point();

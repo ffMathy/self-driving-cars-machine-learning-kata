@@ -50,7 +50,7 @@ namespace MachineLearningPractice.Services
             var currentNode = firstNode;
             var currentProgressLine = currentNode
                 ?.ProgressLines
-                ?.OrderBy(x => x.Line.Center.GetDistanceTo(currentNode.Position))
+                ?.OrderBy(x => x.Line.Center.GetDistanceTo(currentNode.BoundingBox.Location))
                 ?.First();
 
             var progressLineOffset = 1;
@@ -114,10 +114,18 @@ namespace MachineLearningPractice.Services
                     GetWallLineFromDirection(origin, entranceDirection),
                     GetWallLineFromDirection(origin, exitDirection)
                 },
-                Position = new Point(
-                    (decimal)Map.TileSize,
-                    origin.X,
-                    origin.Y)
+                BoundingBox = new BoundingBox()
+                {
+                    Location = new Point(
+                        (decimal)Map.TileSize,
+                        origin.X - (decimal)Map.TileSize / 2,
+                        origin.Y - (decimal)Map.TileSize / 2),
+                    Size = new Size()
+                    {
+                        Width = (decimal)Map.TileSize,
+                        Height = (decimal)Map.TileSize
+                    }
+                }
             };
         }
 

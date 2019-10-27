@@ -74,7 +74,7 @@ namespace MachineLearningPractice
 
         private void RunSingleGeneration(int tickDelay)
         {
-            var isSlow = carsSimulation.CurrentGeneration % 30 == 29 && tickDelay > 0;
+            var isSlow = true || carsSimulation.CurrentGeneration % 30 == 29 && tickDelay > 0;
 
             var stopwatch = Stopwatch.StartNew();
 
@@ -230,15 +230,15 @@ namespace MachineLearningPractice
         {
             var rectangle = new Rectangle()
             {
-                Width = Map.TileSize,
-                Height = Map.TileSize,
+                Width = (double)node.BoundingBox.Size.Width,
+                Height = (double)node.BoundingBox.Size.Height,
                 Fill = Brushes.White,
                 Opacity = 1
             };
             MapCanvas.Children.Add(rectangle);
 
-            Canvas.SetLeft(rectangle, (double)node.Position.X - Map.TileSize / 2);
-            Canvas.SetTop(rectangle, (double)node.Position.Y - Map.TileSize / 2);
+            Canvas.SetLeft(rectangle, (double)node.BoundingBox.Location.X);
+            Canvas.SetTop(rectangle, (double)node.BoundingBox.Location.Y);
 
             foreach (var progressLine in node.ProgressLines)
                 RenderLine(progressLine.Line, Brushes.LightGray, 0.25, progressLine.Offset.ToString());

@@ -26,7 +26,7 @@ namespace MachineLearningPractice.Models
         public Direction EntranceDirection { get; set; }
         public Direction ExitDirection { get; set; }
 
-        public Point Position { get; set; }
+        public BoundingBox BoundingBox { get; set; }
 
         public ProgressLine[] ProgressLines { get; set; }
 
