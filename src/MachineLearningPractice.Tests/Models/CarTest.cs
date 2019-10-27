@@ -26,17 +26,18 @@ namespace MachineLearningPractice.Tests.Models
         public void CarInCenteredBoxShowsCorrectSensorReadings()
         {
             var random = new Random();
-            var carNeuralNetwork = new CarNeuralNetwork();
+            var carNeuralNetwork = new CarNeuralNetwork(random);
 
             var map = GenerateCircularMap();
 
             var carSimulation = new CarSimulation(
                 random,
                 map,
-                carNeuralNetwork,
-                0);
+                carNeuralNetwork);
 
-            var readings = carSimulation.GetSensorReadings();
+            carSimulation.Tick();
+
+            var readings = carSimulation.SensorReadings;
 
             Assert.IsNotNull(readings.LeftSensor);
             Assert.IsNotNull(readings.CenterSensor);

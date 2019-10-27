@@ -29,7 +29,6 @@ namespace MachineLearningPractice.Services
 
     public class CarSimulation
     {
-        private readonly Random random;
         private readonly Map map;
         private readonly CarNeuralNetwork carNeuralNetwork;
 
@@ -40,7 +39,6 @@ namespace MachineLearningPractice.Services
         private int lastProgressLineOffset;
 
         public long TicksSurvived { get; private set; }
-        public decimal DistanceTraveled { get; private set; }
 
         public ProgressLine CurrentProgressLine { get; private set; }
 
@@ -50,29 +48,22 @@ namespace MachineLearningPractice.Services
 
         public Car Car { get; private set; }
 
-        public HashSet<CarSimulationTick> PendingTrainingInstructions { get; }
+        private Random random;
 
         public bool IsCrashed { get; private set; }
 
         public decimal Fitness { get; private set; }
 
-        public decimal RandomnessFactor { get; }
-
         public CarSimulation(
             Random random,
             Map map,
-            CarNeuralNetwork carNeuralNetwork,
-            decimal randomnessFactor)
+            CarNeuralNetwork carNeuralNetwork)
         {
-
             this.Car = new Car();
 
-            this.PendingTrainingInstructions = new HashSet<CarSimulationTick>();
-
-            this.random = random;
-            this.map = map;
             this.carNeuralNetwork = carNeuralNetwork;
-            this.RandomnessFactor = randomnessFactor;
+            this.map = map;
+            this.random = random;
 
             var allProgressLines = this.map.Nodes.SelectMany(x => x.ProgressLines);
             this.allProgressLinesByMapNodeOffset = allProgressLines
@@ -97,17 +88,6 @@ namespace MachineLearningPractice.Services
             Reset();
         }
 
-        //public CarSimulation CrossWith(CarSimulation carSimulation)
-        //{
-        //    var newSimulation = new CarSimulation(
-        //        random,
-        //        map,
-        //        carNeuralNetwork,
-        //        RandomnessFactor);
-
-
-        //}
-
         public void Tick()
         {
             if (IsCrashed)
@@ -117,8 +97,8 @@ namespace MachineLearningPractice.Services
 
             var neuralNetCarResponse = this.carNeuralNetwork.Ask(SensorReadings);
 
-            var deltaVelocity = (neuralNetCarResponse.AccelerationDeltaVelocity) + GetRandomnessFactor(1);
-            var deltaAngle = (neuralNetCarResponse.TurnDeltaAngle) + GetRandomnessFactor(0.75m);
+            var deltaVelocity = neuralNetCarResponse.AccelerationDeltaVelocity;
+            var deltaAngle = neuralNetCarResponse.TurnDeltaAngle;
 
             deltaVelocity = Car.Accelerate(deltaVelocity);
             deltaAngle = Car.Turn(deltaAngle);
@@ -149,17 +129,12 @@ namespace MachineLearningPractice.Services
                 }
             }
 
-            PendingTrainingInstructions.Add(new CarSimulationTick()
+            carNeuralNetwork.Record(SensorReadings, new CarResponse()
             {
-                CarResponse = new CarResponse()
-                {
-                    AccelerationDeltaVelocity = deltaVelocity,
-                    TurnDeltaAngle = deltaAngle
-                },
-                CarSensorReading = SensorReadings
+                AccelerationDeltaVelocity = deltaVelocity,
+                TurnDeltaAngle = deltaAngle
             });
 
-            DistanceTraveled += Car.SpeedVelocity;
             TicksSurvived++;
 
             CalculateFitness();
@@ -169,6 +144,25 @@ namespace MachineLearningPractice.Services
                 IsCrashed = true;
                 return;
             }
+        }
+
+        public void ApplyTraining()
+        {
+            carNeuralNetwork.Train();
+        }
+
+        public CarSimulation CrossWith(CarSimulation other)
+        {
+            return new CarSimulation(
+                random,
+                map,
+                carNeuralNetwork.CrossWith(
+                    other.carNeuralNetwork));
+        }
+
+        public void Mutate()
+        {
+            carNeuralNetwork.Mutate();
         }
 
         private void CalculateFitness()
@@ -188,7 +182,6 @@ namespace MachineLearningPractice.Services
             IsCrashed = false;
             TicksSurvived = 0;
             laps = 0;
-            PendingTrainingInstructions.Clear();
 
             CurrentProgressLine = this.map.Nodes.First().ProgressLines.First();
 
@@ -284,11 +277,6 @@ namespace MachineLearningPractice.Services
             return carSensorReadings
                 .OrderBy(x => x.Distance)
                 .First();
-        }
-
-        private decimal GetRandomnessFactor(decimal multiplier)
-        {
-            return (((decimal)random.NextDouble() * RandomnessFactor * 2) - RandomnessFactor) * multiplier;
         }
     }
 }

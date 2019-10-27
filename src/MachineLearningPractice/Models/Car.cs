@@ -37,6 +37,8 @@ namespace MachineLearningPractice.Models
         {
             const int size = Size;
 
+            SpeedVelocity = 5;
+
             BoundingBox = new BoundingBox()
             {
                 Size = new Size()
@@ -57,7 +59,7 @@ namespace MachineLearningPractice.Models
             var previousAngleVelocity = TurnAngleVelocity;
             TurnAngleVelocity += deltaAngle;
 
-            const int threshold = 5;
+            const int threshold = 2;
 
             if (TurnAngleVelocity < -threshold) { 
                 TurnAngleVelocity = -threshold;
@@ -65,7 +67,7 @@ namespace MachineLearningPractice.Models
                 TurnAngleVelocity = threshold;
             }
 
-            Accelerate(-Math.Abs(TurnAngleVelocity) / 500m);
+            Accelerate(-Math.Abs(TurnAngleVelocity) / 2000m);
 
             return TurnAngleVelocity - previousAngleVelocity;
         }

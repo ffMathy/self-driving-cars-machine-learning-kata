@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace MachineLearningPractice
 {
@@ -25,45 +27,22 @@ namespace MachineLearningPractice
     public partial class MainWindow : Window
     {
         private readonly Random random;
-        private readonly CarNeuralNetwork carNeuralNetwork;
+        private readonly CarsSimulation carsSimulation;
         private readonly DirectionHelper directionHelper;
 
         private bool keepRunning;
-        private int generation;
 
         private Map map;
-
-        private List<CarSimulation> simulations;
-        private List<CarSimulation> currentBestSimulationsInGeneration;
-
-        private HashSet<UIElement> renderedObjects;
 
         public MainWindow()
         {
             this.random = new Random();
-            this.carNeuralNetwork = new CarNeuralNetwork();
             this.directionHelper = new DirectionHelper(this.random);
-            this.currentBestSimulationsInGeneration = new List<CarSimulation>();
-            this.renderedObjects = new HashSet<UIElement>();
 
             InitializeComponent();
             GenerateNewMap();
-            LoadSimulations();
-        }
 
-        private void LoadSimulations()
-        {
-            const int simulationCount = 100;
-
-            simulations = new List<CarSimulation>();
-            for (var i = 0; i < simulationCount; i++)
-            {
-                simulations.Add(new CarSimulation(
-                    random,
-                    map,
-                    carNeuralNetwork,
-                    i == 0 || generation > 0 ? 0m : 0.5m));
-            }
+            this.carsSimulation = new CarsSimulation(random, map);
         }
 
         private void GenerateNewMapButton_Click(object sender, RoutedEventArgs e)
@@ -71,114 +50,70 @@ namespace MachineLearningPractice
             GenerateNewMap();
         }
 
-        private async void TrainGenerationButton_Click(object sender, RoutedEventArgs e)
+        private void TrainGenerationButton_Click(object sender, RoutedEventArgs e)
         {
             do
             {
-                await TrainGeneration(1);
+                TrainGeneration(1);
             } while (keepRunning);
         }
 
-        private async Task TrainGeneration(int tickDelay)
+        private void TrainGeneration(int tickDelay)
         {
-            await RunSingleGeneration(simulations, tickDelay);
-            TrainPendingInstructionsFromBestGeneration();
+            RunSingleGeneration(tickDelay);
+            //TrainPendingInstructionsFromBestGeneration();
         }
 
-        private void TrainPendingInstructionsFromBestGeneration()
+        private static void DoEvents()
         {
-            var instructions = currentBestSimulationsInGeneration
-                .SelectMany(x => x
-                    .PendingTrainingInstructions
-                    .Take(x.PendingTrainingInstructions.Count / currentBestSimulationsInGeneration.Count));
-
-            foreach (var pendingTrainingInstruction in instructions)
-            {
-                carNeuralNetwork.Record(
-                    pendingTrainingInstruction.CarSensorReading,
-                    pendingTrainingInstruction.CarResponse);
-            }
-
-            carNeuralNetwork.Train();
-
-            generation++;
+            var frame = new DispatcherFrame();
+            Dispatcher.CurrentDispatcher.BeginInvoke(
+                DispatcherPriority.Background,
+                new DispatcherOperationCallback(f => {
+                    ((DispatcherFrame)f).Continue = false;
+                    return null;
+                }), 
+                frame);
+            Dispatcher.PushFrame(frame);
         }
 
-        private void ParallelizeForIf<T>(bool condition, IEnumerable<T> enumerable, Action<T> action)
+        private void RunSingleGeneration(int tickDelay)
         {
-            if(condition) { 
-                Parallel.ForEach(enumerable, action);
-            } else
-            {
-                foreach(var item in enumerable)
-                {
-                    action(item);
-                }
-            }
-        }
+            //var isSlow = generation % 10 == 1 && tickDelay > 0;
+            var isSlow = true;
 
-        private async Task RunSingleGeneration(List<CarSimulation> simulations, int tickDelay)
-        {
-            foreach (var simulation in simulations)
-            {
-                simulation.Reset();
-            }
-
-            var crashedCount = 0;
-            var isSlow = generation % 10 == 1 && tickDelay > 0;
+            var stopwatch = Stopwatch.StartNew();
 
             ClearCanvas();
 
-            var ticks = 0L;
-            var stopwatch = Stopwatch.StartNew();
-            while (crashedCount < simulations.Count)
-            {
-                ticks++;
-
+            carsSimulation.SimulateWholeGeneration(() => { 
                 var shouldSkipRender = !isSlow && stopwatch.ElapsedMilliseconds < 10000;
-                if (!shouldSkipRender)
-                    ClearCanvas();
+                if (shouldSkipRender)
+                    return;
 
-                ParallelizeForIf(shouldSkipRender, simulations, simulation => { 
-                    if (!simulation.IsCrashed)
-                    {
-                        simulation.Tick();
-                        if (simulation.IsCrashed)
-                            crashedCount++;
-                    }
+                ClearCanvas();
 
-                    if (!shouldSkipRender)
-                        RenderCarSimulation(simulation, !isSlow);
-                });
+                foreach(var simulation in carsSimulation.AllSimulations)
+                    RenderCarSimulation(simulation, shouldSkipRender);
 
-                var amountOfBestGenerationsToPick = simulations.Count / 10;
-
-                currentBestSimulationsInGeneration = simulations
-                    .OrderBy(x => x.Fitness)
-                    .Take(amountOfBestGenerationsToPick)
-                    .ToList();
-
-                if (!shouldSkipRender)
-                    await Task.Delay(tickDelay);
-            }
+                Thread.Sleep(tickDelay);
+                DoEvents();
+            });
 
             stopwatch.Stop();
 
             if (!isSlow)
             {
-                foreach (var simulation in simulations)
-                {
+                foreach (var simulation in carsSimulation.AllSimulations)
                     RenderCarSimulation(simulation, false);
-                }
 
-                await Task.Delay(100);
+                DoEvents();
+                Thread.Sleep(500);
             }
         }
 
         private void GenerateNewMap()
         {
-            ClearCanvas();
-
             var mapGeneratorService = new MapGeneratorService(
                 this.random,
                 this.directionHelper);
@@ -189,10 +124,8 @@ namespace MachineLearningPractice
 
         private void ClearCanvas()
         {
-            foreach (var element in renderedObjects)
-                MapCanvas.Children.Remove(element);
-
-            renderedObjects.Clear();
+            MapCanvas.Children.Clear();
+            RenderMap();
         }
 
         private void RenderMap()
@@ -205,7 +138,6 @@ namespace MachineLearningPractice
 
         private void Render(UIElement element)
         {
-            renderedObjects.Add(element);
             MapCanvas.Children.Add(element);
         }
 
@@ -214,15 +146,7 @@ namespace MachineLearningPractice
             var car = carSimulation.Car;
 
             var color = Brushes.Green;
-            if (currentBestSimulationsInGeneration.Contains(carSimulation))
-            {
-                color = Brushes.Blue;
-            }
-            else if (carSimulation.RandomnessFactor == 0)
-            {
-                color = Brushes.Purple;
-            }
-            else if (carSimulation.IsCrashed)
+            if (carSimulation.IsCrashed)
             {
                 color = Brushes.Red;
 
@@ -267,6 +191,8 @@ namespace MachineLearningPractice
 
         private void RenderCarSimulationSensorReadings(CarSimulation carSimulation)
         {
+            return;
+
             if (carSimulation.IsCrashed)
                 return;
 
@@ -356,11 +282,11 @@ namespace MachineLearningPractice
             MapCanvas.Children.Add(label);
         }
 
-        private async void TrainMultipleGenerationsButton_Click(object sender, RoutedEventArgs e)
+        private void TrainMultipleGenerationsButton_Click(object sender, RoutedEventArgs e)
         {
             for (var i = 0; i < 3; i++)
             {
-                await TrainGeneration(0);
+                TrainGeneration(0);
             }
 
             TrainGenerationButton_Click(sender, e);
