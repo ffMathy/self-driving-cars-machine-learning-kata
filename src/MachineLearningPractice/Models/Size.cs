@@ -10,5 +10,10 @@ namespace MachineLearningPractice.Models
     {
         public decimal Width { get; set; }
         public decimal Height { get; set; }
+
+        public override string ToString()
+        {
+            return "(" + Width + "|" + Height + ")";
+        }
     }
 }

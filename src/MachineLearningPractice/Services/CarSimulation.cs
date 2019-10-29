@@ -103,17 +103,14 @@ namespace MachineLearningPractice.Services
             if (previousProgressLine == null || Math.Abs(newProgressLine.Offset - previousProgressLine.Offset) < 3)
                 CurrentProgressLine = newProgressLine;
 
-            var mapNodes = new []
+            var mapNodeBoundingBoxes = new []
             {
-                CurrentMapNode,
-                CurrentMapNode.Previous,
-                CurrentMapNode.Next
+                CurrentMapNode.Previous.BoundingBox,
+                CurrentMapNode.BoundingBox,
+                CurrentMapNode.Next.BoundingBox
             };
 
-            var isWithinAnyNode = mapNodes.Any(x => 
-                Car.BoundingBox.IsWithin(
-                    x.BoundingBox));
-
+            var isWithinAnyNode = Car.BoundingBox.IsWithin(mapNodeBoundingBoxes);
             if (!isWithinAnyNode)
             {
                 IsCrashed = true;

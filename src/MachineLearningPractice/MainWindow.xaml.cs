@@ -54,7 +54,7 @@ namespace MachineLearningPractice
         {
             do
             {
-                RunSingleGeneration(1);
+                RunSingleGeneration(1000);
             } while (keepRunning);
         }
 
@@ -78,21 +78,22 @@ namespace MachineLearningPractice
 
             var stopwatch = Stopwatch.StartNew();
 
-            carsSimulation.SimulateWholeGeneration(() =>
-            {
-                DoEvents();
+            carsSimulation.SimulateWholeGeneration(
+                () =>
+                {
+                    var shouldSkipRender = !isSlow && stopwatch.ElapsedMilliseconds < 60_000;
+                    if (shouldSkipRender)
+                        return;
 
-                var shouldSkipRender = !isSlow && stopwatch.ElapsedMilliseconds < 60_000;
-                if (shouldSkipRender)
-                    return;
+                    ClearCanvas();
 
-                ClearCanvas();
+                    foreach (var simulation in carsSimulation.AllSimulations)
+                        RenderCarSimulation(simulation, shouldSkipRender);
 
-                foreach (var simulation in carsSimulation.AllSimulations)
-                    RenderCarSimulation(simulation, shouldSkipRender);
-
-                Thread.Sleep(tickDelay);
-            });
+                    Thread.Sleep(0);
+                    DoEvents();
+                },
+                (timeElapsed) => Delay(tickDelay - timeElapsed));
 
             stopwatch.Stop();
 
@@ -111,6 +112,18 @@ namespace MachineLearningPractice
                     Thread.Sleep(500);
                 }
             }
+        }
+
+        private void Delay(int durationInMilliseconds)
+        {
+            var stopwatch = Stopwatch.StartNew();
+            while(stopwatch.ElapsedMilliseconds < durationInMilliseconds)
+            {
+                Thread.Sleep(1);
+                DoEvents();
+            }
+
+            stopwatch.Stop();
         }
 
         private void GenerateNewMap()

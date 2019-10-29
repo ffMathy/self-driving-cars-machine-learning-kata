@@ -1,8 +1,10 @@
 ﻿using MachineLearningPractice.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace MachineLearningPractice.Services
 {
@@ -132,7 +134,9 @@ namespace MachineLearningPractice.Services
             }
         }
 
-        public void SimulateWholeGeneration(Action onPostTick = null)
+        public void SimulateWholeGeneration(
+            Action onPostTick = null,
+            Action<int> delayAction = null)
         {
             foreach (var simulation in AllSimulations)
             {
@@ -144,8 +148,13 @@ namespace MachineLearningPractice.Services
 
             while (AliveSimulations.Count > 0)
             {
+                var stopwatch = Stopwatch.StartNew();
                 SimulateTick();
+
                 onPostTick?.Invoke();
+                delayAction?.Invoke((int)stopwatch.ElapsedMilliseconds);
+
+                stopwatch.Stop();
             }
 
             OnGenerationCompleted();

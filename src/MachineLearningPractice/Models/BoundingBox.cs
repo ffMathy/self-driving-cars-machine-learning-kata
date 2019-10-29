@@ -20,16 +20,26 @@ namespace MachineLearningPractice.Models
         public bool IsWithin(BoundingBox other)
         {
             return 
-                Location.X >= other.Location.X &&
-                Location.Y >= other.Location.Y &&
-                Location.X + Size.Width <= other.Location.X + other.Size.Width &&
-                Location.Y + Size.Height <= other.Location.Y + other.Size.Height;
+                Center.X >= other.Location.X &&
+                Center.Y >= other.Location.Y &&
+                Center.X <= other.Location.X + other.Size.Width &&
+                Center.Y <= other.Location.Y + other.Size.Height;
+        }
+
+        public bool IsWithin(BoundingBox[] others)
+        {
+            return others.Any(IsWithin);
         }
 
         public BoundingBox()
         {
             Location = new Point();
             Size = new Size();
+        }
+
+        public override string ToString()
+        {
+            return Location.ToString() + " " + Size.ToString();
         }
     }
 }
