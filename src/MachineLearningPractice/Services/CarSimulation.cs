@@ -67,7 +67,9 @@ namespace MachineLearningPractice.Services
             this.map = map;
             this.random = random;
 
-            var allProgressLines = this.map.Nodes.SelectMany(x => x.ProgressLines);
+            var allProgressLines = this.map.Nodes
+                .SelectMany(x => x.ProgressLines)
+                .OrderBy(x => x.Offset);
             this.allProgressLinesByMapNodeOffset = allProgressLines
                 .GroupBy(x => x
                     .MapNode
@@ -105,19 +107,14 @@ namespace MachineLearningPractice.Services
 
             var mapNodeBoundingBoxes = new []
             {
+                CurrentMapNode.Previous.Previous.BoundingBox,
                 CurrentMapNode.Previous.BoundingBox,
                 CurrentMapNode.BoundingBox,
-                CurrentMapNode.Next.BoundingBox
+                CurrentMapNode.Next.BoundingBox,
+                CurrentMapNode.Next.Next.BoundingBox
             };
 
-            var isWithinAnyNode = Car.BoundingBox.IsWithin(mapNodeBoundingBoxes);
-            if (!isWithinAnyNode)
-            {
-                IsCrashed = true;
-                return;
-            }
-
-            if (newProgressLine.Offset > highestProgressLineOffset)
+            if (newProgressLine.Offset > highestProgressLineOffset || (newProgressLine.Offset == 0 && previousProgressLine.Offset == lastProgressLineOffset))
             {
                 lastProgressLineIncreaseTick = TicksSurvived;
                 highestProgressLineOffset = newProgressLine.Offset;
@@ -133,6 +130,13 @@ namespace MachineLearningPractice.Services
                 {
                     laps--;
                 }
+            }
+
+            var isWithinAnyNode = Car.BoundingBox.IsWithin(mapNodeBoundingBoxes);
+            if (!isWithinAnyNode)
+            {
+                IsCrashed = true;
+                return;
             }
 
             carNeuralNetwork.Record(SensorReadings, new CarResponse()
@@ -182,14 +186,14 @@ namespace MachineLearningPractice.Services
 
         private void CalculateFitness()
         {
-            var lastOffset = map.Nodes.Length * 3;
+            var lastOffset = map.Nodes.Length;
 
             var progressPenalty = lastOffset - CurrentProgressLine.Offset;
-            var lapPenalty = -(lastOffset * this.laps) * 2;
+            var lapPenalty = lastOffset * this.laps;
 
             var timePenalty = TicksSurvived;
 
-            Fitness = timePenalty + ((progressPenalty + lapPenalty) * 30);
+            Fitness = timePenalty + ((progressPenalty - lapPenalty) * 30);
         }
 
         public void Reset()

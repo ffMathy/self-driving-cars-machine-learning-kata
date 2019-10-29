@@ -68,7 +68,7 @@ namespace MachineLearningPractice.Models
             }
 
             var delta = TurnAngleVelocity - previousAngleVelocity;
-            Accelerate(-Math.Abs(delta) / 1000m);
+            Accelerate(-Math.Abs(delta) / 10000m);
 
             return delta;
         }
@@ -76,7 +76,7 @@ namespace MachineLearningPractice.Models
         public decimal Accelerate(decimal deltaVelocity)
         {
             var previousSpeedVelocity = SpeedVelocity;
-            SpeedVelocity += deltaVelocity / 2m;
+            SpeedVelocity += deltaVelocity * 2;
 
             EnsureSpeedWithinBounds();
 
@@ -85,8 +85,8 @@ namespace MachineLearningPractice.Models
 
         private void EnsureSpeedWithinBounds()
         {
-            const decimal highThreshold = 10;
-            const decimal lowThreshold = 1m;
+            const decimal highThreshold = 30;
+            const decimal lowThreshold = 5m;
 
             if (SpeedVelocity < lowThreshold)
                 SpeedVelocity = lowThreshold;

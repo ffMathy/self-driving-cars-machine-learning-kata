@@ -112,13 +112,20 @@ namespace MachineLearningPractice.Models
             if (delta == 0)
                 return null;
 
-            var point = new Point()
+            try
             {
-                X = ((other.Formula.B * this.Formula.C) - (this.Formula.B * other.Formula.C)) / delta,
-                Y = ((this.Formula.A * other.Formula.C) - (other.Formula.A * this.Formula.C)) / delta
-            };
+                var point = new Point()
+                {
+                    X = ((other.Formula.B * this.Formula.C) - (this.Formula.B * other.Formula.C)) / delta,
+                    Y = ((this.Formula.A * other.Formula.C) - (other.Formula.A * this.Formula.C)) / delta
+                };
 
-            return point;
+                return point;
+            }
+            catch (OverflowException)
+            {
+                return null;
+            }
         }
 
         public static Line operator *(Line a, int b)

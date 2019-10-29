@@ -54,7 +54,7 @@ namespace MachineLearningPractice
         {
             do
             {
-                RunSingleGeneration(1000);
+                RunSingleGeneration(100);
             } while (keepRunning);
         }
 
@@ -74,7 +74,7 @@ namespace MachineLearningPractice
 
         private void RunSingleGeneration(int tickDelay)
         {
-            var isSlow = true || carsSimulation.CurrentGeneration % 30 == 29 && tickDelay > 0;
+            var isSlow = carsSimulation.CurrentGeneration % 100 == 99 && tickDelay > 0;
 
             var stopwatch = Stopwatch.StartNew();
 
@@ -93,7 +93,7 @@ namespace MachineLearningPractice
                     Thread.Sleep(0);
                     DoEvents();
                 },
-                (timeElapsed) => Delay(tickDelay - timeElapsed));
+                (timeElapsed) => Delay(isSlow ? tickDelay - timeElapsed : 0));
 
             stopwatch.Stop();
 
@@ -108,14 +108,16 @@ namespace MachineLearningPractice
 
                 if (tickDelay > 0)
                 {
-                    DoEvents();
-                    Thread.Sleep(500);
+                    Delay(50);
                 }
             }
         }
 
-        private void Delay(int durationInMilliseconds)
+        private static void Delay(int durationInMilliseconds)
         {
+            if(durationInMilliseconds == 0)
+                return;
+
             var stopwatch = Stopwatch.StartNew();
             while(stopwatch.ElapsedMilliseconds < durationInMilliseconds)
             {
