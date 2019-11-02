@@ -50,7 +50,7 @@ namespace MachineLearningPractice.Services
 
         private void AddNewSimulation(CarSimulation simulation)
         {
-            if (simulation.IsCrashed)
+            if (simulation.HasEnded)
             {
                 CrashedSimulations.Add(simulation);
             }
@@ -123,7 +123,7 @@ namespace MachineLearningPractice.Services
             {
                 simulation.Tick();
 
-                if (simulation.IsCrashed)
+                if (simulation.HasEnded)
                     newlyCrashedSimulations.Add(simulation);
             }
 

@@ -16,4 +16,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\FluffySpoon.Neuro.Evolution\src\FluffySpoon.Neuro.Evolution\FluffySpoon.Neuro.Evolution.csproj" />
+  </ItemGroup>
+
 </Project>

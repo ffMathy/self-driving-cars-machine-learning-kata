@@ -162,7 +162,7 @@ namespace MachineLearningPractice
             var car = carSimulation.Car;
 
             var color = Brushes.Green;
-            if (carSimulation.IsCrashed)
+            if (carSimulation.HasEnded)
             {
                 color = Brushes.Red;
 
@@ -184,7 +184,7 @@ namespace MachineLearningPractice
             Canvas.SetLeft(ellipse, (double)car.BoundingBox.Location.X);
             Canvas.SetTop(ellipse, (double)car.BoundingBox.Location.Y);
 
-            if (carSimulation.IsCrashed)
+            if (carSimulation.HasEnded)
                 return;
 
             if (!shouldUseFastRender)
@@ -209,7 +209,7 @@ namespace MachineLearningPractice
         {
             return;
 
-            if (carSimulation.IsCrashed)
+            if (carSimulation.HasEnded)
                 return;
 
             var sensorReadings = carSimulation.SensorReadings;

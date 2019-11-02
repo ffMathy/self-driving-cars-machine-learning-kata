@@ -1,4 +1,5 @@
-﻿using MachineLearningPractice.Helpers;
+﻿using FluffySpoon.Neuro.Evolution;
+using MachineLearningPractice.Helpers;
 using MachineLearningPractice.Models;
 using System;
 using System.Collections.Generic;
@@ -27,10 +28,9 @@ namespace MachineLearningPractice.Services
         public double Distance { get; set; }
     }
 
-    public class CarSimulation
+    public class CarSimulation : ISimulation
     {
         private readonly Map map;
-        private readonly CarNeuralNetwork carNeuralNetwork;
 
         private readonly IDictionary<int, List<ProgressLine>> allProgressLinesByMapNodeOffset;
 
@@ -50,22 +50,16 @@ namespace MachineLearningPractice.Services
 
         public Car Car { get; private set; }
 
-        private Random random;
+        public bool HasEnded { get; private set; }
 
-        public bool IsCrashed { get; private set; }
-
-        public decimal Fitness { get; private set; }
+        public double Fitness { get; private set; }
 
         public CarSimulation(
-            Random random,
-            Map map,
-            CarNeuralNetwork carNeuralNetwork)
+            Map map)
         {
-            this.Car = new Car();
+            Car = new Car();
 
-            this.carNeuralNetwork = carNeuralNetwork;
             this.map = map;
-            this.random = random;
 
             var allProgressLines = this.map.Nodes
                 .SelectMany(x => x.ProgressLines)
@@ -80,108 +74,11 @@ namespace MachineLearningPractice.Services
 
             this.lastProgressLineOffset = allProgressLines.Last().Offset;
 
-            Reset();
-        }
+            HasEnded = false;
+            TicksSurvived = 0;
+            laps = 0;
 
-        public void Tick()
-        {
-            if (IsCrashed)
-                return;
-
-            SensorReadings = GetSensorReadings();
-
-            var neuralNetCarResponse = this.carNeuralNetwork.Ask(SensorReadings);
-
-            var deltaVelocity = neuralNetCarResponse.AccelerationDeltaVelocity;
-            var deltaAngle = neuralNetCarResponse.TurnDeltaAngle;
-
-            deltaVelocity = Car.Accelerate(deltaVelocity);
-            deltaAngle = Car.Turn(deltaAngle);
-
-            Car.Tick();
-
-            var previousProgressLine = CurrentProgressLine;
-            var newProgressLine = GetClosestIntersectionPointProgressLine();
-            if (previousProgressLine == null || Math.Abs(newProgressLine.Offset - previousProgressLine.Offset) < 3)
-                CurrentProgressLine = newProgressLine;
-
-            var mapNodeBoundingBoxes = new []
-            {
-                CurrentMapNode.Previous.Previous.BoundingBox,
-                CurrentMapNode.Previous.BoundingBox,
-                CurrentMapNode.BoundingBox,
-                CurrentMapNode.Next.BoundingBox,
-                CurrentMapNode.Next.Next.BoundingBox
-            };
-
-            if (newProgressLine.Offset > highestProgressLineOffset || (newProgressLine.Offset == 0 && previousProgressLine.Offset == lastProgressLineOffset))
-            {
-                lastProgressLineIncreaseTick = TicksSurvived;
-                highestProgressLineOffset = newProgressLine.Offset;
-            }
-
-            if (previousProgressLine != null)
-            {
-                if (CurrentProgressLine.Offset == 0 && previousProgressLine.Offset == lastProgressLineOffset)
-                {
-                    laps++;
-                }
-                else if (previousProgressLine.Offset == 0 && CurrentProgressLine.Offset == lastProgressLineOffset)
-                {
-                    laps--;
-                }
-            }
-
-            var isWithinAnyNode = Car.BoundingBox.IsWithin(mapNodeBoundingBoxes);
-            if (!isWithinAnyNode)
-            {
-                IsCrashed = true;
-                return;
-            }
-
-            carNeuralNetwork.Record(SensorReadings, new CarResponse()
-            {
-                AccelerationDeltaVelocity = deltaVelocity,
-                TurnDeltaAngle = deltaAngle
-            });
-
-            TicksSurvived++;
-
-            CalculateFitness();
-
-            if(lastProgressLineIncreaseTick != 0) { 
-                var timeSinceLastProgressLineIncrease = TicksSurvived - lastProgressLineIncreaseTick;
-                if(timeSinceLastProgressLineIncrease > 600)
-                {
-                    IsCrashed = true;
-                    return;
-                }
-            }
-
-            if (Fitness > 3000)
-            {
-                IsCrashed = true;
-                return;
-            }
-        }
-
-        public void ApplyTraining()
-        {
-            carNeuralNetwork.Train();
-        }
-
-        public CarSimulation CrossWith(CarSimulation other)
-        {
-            return new CarSimulation(
-                random,
-                map,
-                carNeuralNetwork.CrossWith(
-                    other.carNeuralNetwork));
-        }
-
-        public void Mutate()
-        {
-            carNeuralNetwork.Mutate();
+            CurrentProgressLine = this.map.Nodes.First().ProgressLines.First();
         }
 
         private void CalculateFitness()
@@ -194,17 +91,6 @@ namespace MachineLearningPractice.Services
             var timePenalty = TicksSurvived;
 
             Fitness = timePenalty + ((progressPenalty - lapPenalty) * 30);
-        }
-
-        public void Reset()
-        {
-            IsCrashed = false;
-            TicksSurvived = 0;
-            laps = 0;
-
-            CurrentProgressLine = this.map.Nodes.First().ProgressLines.First();
-
-            Car = new Car();
         }
 
         private ProgressLine GetClosestIntersectionPointProgressLine()
@@ -279,6 +165,111 @@ namespace MachineLearningPractice.Services
             return carSensorReadings
                 .OrderBy(x => x.Distance)
                 .First();
+        }
+
+        private static double[] GetNeuralInputFromSensorReading(CarSensorReadingSnapshot sensorReading)
+        {
+            return new[] {
+                sensorReading.CenterSensor?.Distance ?? 0,
+                sensorReading.LeftSensor?.Distance ?? 0,
+                sensorReading.RightSensor?.Distance ?? 0
+            };
+        }
+
+        private static decimal NormalizeBinaryPrediction(double prediction)
+        {
+            if (prediction > 0.66)
+            {
+                return 1m;
+            }
+            else if (prediction < 0.33)
+            {
+                return -1m;
+            }
+
+            return 0;
+        }
+
+        public async Task<double[]> GetInputsAsync()
+        {
+            SensorReadings = GetSensorReadings();
+            return GetNeuralInputFromSensorReading(SensorReadings);
+        }
+
+        public async Task TickAsync(double[] outputs)
+        {
+            var neuralNetCarResponse = new CarResponse()
+            {
+                AccelerationDeltaVelocity = NormalizeBinaryPrediction(outputs[0]),
+                TurnDeltaAngle = NormalizeBinaryPrediction(outputs[1])
+            };
+
+            var deltaVelocity = neuralNetCarResponse.AccelerationDeltaVelocity;
+            var deltaAngle = neuralNetCarResponse.TurnDeltaAngle;
+
+            deltaVelocity = Car.Accelerate(deltaVelocity);
+            deltaAngle = Car.Turn(deltaAngle);
+
+            Car.Tick();
+
+            var previousProgressLine = CurrentProgressLine;
+            var newProgressLine = GetClosestIntersectionPointProgressLine();
+            if (previousProgressLine == null || Math.Abs(newProgressLine.Offset - previousProgressLine.Offset) < 3)
+                CurrentProgressLine = newProgressLine;
+
+            var mapNodeBoundingBoxes = new[]
+            {
+                CurrentMapNode.Previous.Previous.BoundingBox,
+                CurrentMapNode.Previous.BoundingBox,
+                CurrentMapNode.BoundingBox,
+                CurrentMapNode.Next.BoundingBox,
+                CurrentMapNode.Next.Next.BoundingBox
+            };
+
+            if (newProgressLine.Offset > highestProgressLineOffset || (newProgressLine.Offset == 0 && previousProgressLine.Offset == lastProgressLineOffset))
+            {
+                lastProgressLineIncreaseTick = TicksSurvived;
+                highestProgressLineOffset = newProgressLine.Offset;
+            }
+
+            if (previousProgressLine != null)
+            {
+                if (CurrentProgressLine.Offset == 0 && previousProgressLine.Offset == lastProgressLineOffset)
+                {
+                    laps++;
+                }
+                else if (previousProgressLine.Offset == 0 && CurrentProgressLine.Offset == lastProgressLineOffset)
+                {
+                    laps--;
+                }
+            }
+
+            var isWithinAnyNode = Car.BoundingBox.IsWithin(mapNodeBoundingBoxes);
+            if (!isWithinAnyNode)
+            {
+                HasEnded = true;
+                return;
+            }
+
+            TicksSurvived++;
+
+            CalculateFitness();
+
+            if (lastProgressLineIncreaseTick != 0)
+            {
+                var timeSinceLastProgressLineIncrease = TicksSurvived - lastProgressLineIncreaseTick;
+                if (timeSinceLastProgressLineIncrease > 600)
+                {
+                    HasEnded = true;
+                    return;
+                }
+            }
+
+            if (Fitness > 3000)
+            {
+                HasEnded = true;
+                return;
+            }
         }
     }
 }

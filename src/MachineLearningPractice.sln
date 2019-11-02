@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.29306.81
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MachineLearningPractice", "MachineLearningPractice\MachineLearningPractice.csproj", "{B66F6636-AB91-40A5-9292-146E1B9C3864}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MachineLearningPractice.Tests", "MachineLearningPractice.Tests\MachineLearningPractice.Tests.csproj", "{9DB040B3-4147-4988-966A-F5FF10E104FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MachineLearningPractice.Tests", "MachineLearningPractice.Tests\MachineLearningPractice.Tests.csproj", "{9DB040B3-4147-4988-966A-F5FF10E104FE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluffySpoon.Neuro.Evolution", "..\..\FluffySpoon.Neuro.Evolution\src\FluffySpoon.Neuro.Evolution\FluffySpoon.Neuro.Evolution.csproj", "{60906023-BD79-4FC7-9050-99FE489D9D2B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{9DB040B3-4147-4988-966A-F5FF10E104FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9DB040B3-4147-4988-966A-F5FF10E104FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9DB040B3-4147-4988-966A-F5FF10E104FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60906023-BD79-4FC7-9050-99FE489D9D2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60906023-BD79-4FC7-9050-99FE489D9D2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60906023-BD79-4FC7-9050-99FE489D9D2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60906023-BD79-4FC7-9050-99FE489D9D2B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
