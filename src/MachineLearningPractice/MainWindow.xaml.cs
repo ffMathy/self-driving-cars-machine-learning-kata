@@ -1,6 +1,8 @@
-﻿using MachineLearningPractice.Helpers;
+﻿using FluffySpoon.Neuro.Evolution;
+using MachineLearningPractice.Helpers;
 using MachineLearningPractice.Models;
 using MachineLearningPractice.Services;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -27,12 +29,12 @@ namespace MachineLearningPractice
     public partial class MainWindow : Window
     {
         private readonly Random random;
-        private readonly CarsSimulation carsSimulation;
         private readonly DirectionHelper directionHelper;
 
         private bool keepRunning;
 
         private Map map;
+        private Generation<CarSimulation> currentGeneration;
 
         public MainWindow()
         {
@@ -42,7 +44,19 @@ namespace MachineLearningPractice
             InitializeComponent();
             GenerateNewMap();
 
-            this.carsSimulation = new CarsSimulation(random, map);
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddFluffySpoonNeuroEvolution(
+                new EvolutionSettings<CarSimulation>() {
+                    AmountOfGenomesInPopulation = 3,
+                    AmountOfWorstGenomesToRemovePerGeneration = 1,
+                    NeuronCounts = new [] { 3, 4, 4, 2 },
+                    NeuronMutationProbability = 0.2,
+                    RandomnessProvider = random,
+                    SimulationFactoryMethod = () => new CarSimulation(map)
+                });
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+            this.currentGeneration = serviceProvider.GetRequiredService<Generation<CarSimulation>>();
         }
 
         private void GenerateNewMapButton_Click(object sender, RoutedEventArgs e)
@@ -52,10 +66,7 @@ namespace MachineLearningPractice
 
         private void TrainGenerationButton_Click(object sender, RoutedEventArgs e)
         {
-            do
-            {
-                RunSingleGeneration(100);
-            } while (keepRunning);
+
         }
 
         private static void DoEvents()
@@ -70,47 +81,6 @@ namespace MachineLearningPractice
                 }),
                 frame);
             Dispatcher.PushFrame(frame);
-        }
-
-        private void RunSingleGeneration(int tickDelay)
-        {
-            var isSlow = carsSimulation.CurrentGeneration % 100 == 99 && tickDelay > 0;
-
-            var stopwatch = Stopwatch.StartNew();
-
-            carsSimulation.SimulateWholeGeneration(
-                () =>
-                {
-                    var shouldSkipRender = !isSlow && stopwatch.ElapsedMilliseconds < 60_000;
-                    if (shouldSkipRender)
-                        return;
-
-                    ClearCanvas();
-
-                    foreach (var simulation in carsSimulation.AllSimulations)
-                        RenderCarSimulation(simulation, shouldSkipRender);
-
-                    Thread.Sleep(0);
-                    DoEvents();
-                },
-                (timeElapsed) => Delay(isSlow ? tickDelay - timeElapsed : 0));
-
-            stopwatch.Stop();
-
-            Title = carsSimulation.CurrentGeneration + "";
-
-            if (!isSlow)
-            {
-                ClearCanvas();
-
-                foreach (var simulation in carsSimulation.AllSimulations)
-                    RenderCarSimulation(simulation, false);
-
-                if (tickDelay > 0)
-                {
-                    Delay(50);
-                }
-            }
         }
 
         private static void Delay(int durationInMilliseconds)
@@ -300,11 +270,6 @@ namespace MachineLearningPractice
 
         private void TrainMultipleGenerationsButton_Click(object sender, RoutedEventArgs e)
         {
-            for (var i = 0; i < 3; i++)
-            {
-                RunSingleGeneration(0);
-            }
-
             TrainGenerationButton_Click(sender, e);
         }
 
