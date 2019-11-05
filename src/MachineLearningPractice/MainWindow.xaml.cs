@@ -34,7 +34,7 @@ namespace MachineLearningPractice
         private bool keepRunning;
 
         private Map map;
-        private Generation<CarSimulation> currentGeneration;
+        private IGeneration<CarSimulation> currentGeneration;
 
         public MainWindow()
         {
@@ -64,9 +64,9 @@ namespace MachineLearningPractice
             GenerateNewMap();
         }
 
-        private void TrainGenerationButton_Click(object sender, RoutedEventArgs e)
+        private async void TrainGenerationButton_Click(object sender, RoutedEventArgs e)
         {
-
+            currentGeneration = await currentGeneration.EvolveAsync();
         }
 
         private static void DoEvents()
