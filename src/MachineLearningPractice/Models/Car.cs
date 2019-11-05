@@ -37,7 +37,7 @@ namespace MachineLearningPractice.Models
         {
             const int size = Size;
 
-            SpeedVelocity = 5;
+            SpeedVelocity = 2;
 
             BoundingBox = new BoundingBox()
             {

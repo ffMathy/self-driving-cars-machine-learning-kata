@@ -46,17 +46,27 @@ namespace MachineLearningPractice
 
             var serviceCollection = new ServiceCollection();
             serviceCollection.AddFluffySpoonNeuroEvolution(
-                new EvolutionSettings<CarSimulation>() {
-                    AmountOfGenomesInPopulation = 3,
-                    AmountOfWorstGenomesToRemovePerGeneration = 1,
-                    NeuronCounts = new [] { 3, 4, 4, 2 },
-                    NeuronMutationProbability = 0.2,
+                new EvolutionSettings<CarSimulation>()
+                {
+                    AmountOfGenomesInPopulation = 100,
+                    AmountOfWorstGenomesToRemovePerGeneration = 80,
+                    NeuronCounts = new[] { 3, 4, 4, 2 },
+                    NeuronMutationProbability = 0.9,
                     RandomnessProvider = random,
-                    SimulationFactoryMethod = () => new CarSimulation(map)
+                    SimulationFactoryMethod = () => new CarSimulation(map),
+                    PostTickMethod = genomes =>
+                    {
+                        ClearCanvas();
+
+                        foreach (var genome in genomes)
+                            RenderCarSimulation(genome.Simulation);
+
+                        Delay(5);
+                    }
                 });
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
-            this.currentGeneration = serviceProvider.GetRequiredService<Generation<CarSimulation>>();
+            this.currentGeneration = serviceProvider.GetRequiredService<IGeneration<CarSimulation>>();
         }
 
         private void GenerateNewMapButton_Click(object sender, RoutedEventArgs e)
@@ -66,7 +76,8 @@ namespace MachineLearningPractice
 
         private async void TrainGenerationButton_Click(object sender, RoutedEventArgs e)
         {
-            currentGeneration = await currentGeneration.EvolveAsync();
+            while(keepRunning)
+                currentGeneration = await currentGeneration.EvolveAsync();
         }
 
         private static void DoEvents()
@@ -85,11 +96,11 @@ namespace MachineLearningPractice
 
         private static void Delay(int durationInMilliseconds)
         {
-            if(durationInMilliseconds == 0)
+            if (durationInMilliseconds == 0)
                 return;
 
             var stopwatch = Stopwatch.StartNew();
-            while(stopwatch.ElapsedMilliseconds < durationInMilliseconds)
+            while (stopwatch.ElapsedMilliseconds < durationInMilliseconds)
             {
                 Thread.Sleep(1);
                 DoEvents();
@@ -127,7 +138,7 @@ namespace MachineLearningPractice
             MapCanvas.Children.Add(element);
         }
 
-        private void RenderCarSimulation(CarSimulation carSimulation, bool shouldUseFastRender)
+        private void RenderCarSimulation(CarSimulation carSimulation)
         {
             var car = carSimulation.Car;
 
@@ -135,9 +146,6 @@ namespace MachineLearningPractice
             if (carSimulation.HasEnded)
             {
                 color = Brushes.Red;
-
-                if (shouldUseFastRender)
-                    return;
             }
 
             var ellipse = new Ellipse()
@@ -157,27 +165,24 @@ namespace MachineLearningPractice
             if (carSimulation.HasEnded)
                 return;
 
-            if (!shouldUseFastRender)
+            var line = new System.Windows.Shapes.Line()
             {
-                var line = new System.Windows.Shapes.Line()
-                {
-                    X1 = (double)car.BoundingBox.Center.X,
-                    Y1 = (double)car.BoundingBox.Center.Y,
-                    X2 = (double)car.BoundingBox.Center.X + ((double)car.ForwardDirectionLine.End.X * (double)car.BoundingBox.Size.Width),
-                    Y2 = (double)car.BoundingBox.Center.Y + ((double)car.ForwardDirectionLine.End.Y * (double)car.BoundingBox.Size.Height),
-                    Stroke = Brushes.Blue,
-                    StrokeDashOffset = 2,
-                    StrokeThickness = 2
-                };
-                Render(line);
+                X1 = (double)car.BoundingBox.Center.X,
+                Y1 = (double)car.BoundingBox.Center.Y,
+                X2 = (double)car.BoundingBox.Center.X + ((double)car.ForwardDirectionLine.End.X * (double)car.BoundingBox.Size.Width),
+                Y2 = (double)car.BoundingBox.Center.Y + ((double)car.ForwardDirectionLine.End.Y * (double)car.BoundingBox.Size.Height),
+                Stroke = Brushes.Blue,
+                StrokeDashOffset = 2,
+                StrokeThickness = 2
+            };
+            Render(line);
 
-                RenderCarSimulationSensorReadings(carSimulation);
-            }
+            RenderCarSimulationSensorReadings(carSimulation);
         }
 
         private void RenderCarSimulationSensorReadings(CarSimulation carSimulation)
         {
-            return;
+            //return;
 
             if (carSimulation.HasEnded)
                 return;
