@@ -32,6 +32,7 @@ namespace MachineLearningPractice
         private readonly DirectionHelper directionHelper;
 
         private bool keepRunning;
+        private bool render;
 
         private Map map;
         private IGeneration<CarSimulation> currentGeneration;
@@ -41,6 +42,8 @@ namespace MachineLearningPractice
             this.random = new Random();
             this.directionHelper = new DirectionHelper(this.random);
 
+            this.render = true;
+
             InitializeComponent();
             GenerateNewMap();
 
@@ -48,35 +51,43 @@ namespace MachineLearningPractice
             serviceCollection.AddFluffySpoonNeuroEvolution(
                 new EvolutionSettings<CarSimulation>()
                 {
-                    AmountOfGenomesInPopulation = 100,
-                    AmountOfWorstGenomesToRemovePerGeneration = 80,
+                    AmountOfGenomesInPopulation = 200,
+                    AmountOfWorstGenomesToRemovePerGeneration = 180,
                     NeuronCounts = new[] { 3, 4, 4, 2 },
-                    NeuronMutationProbability = 0.9,
-                    RandomnessProvider = random,
-                    SimulationFactoryMethod = () => new CarSimulation(map),
-                    PostTickMethod = genomes =>
-                    {
-                        ClearCanvas();
-
-                        foreach (var genome in genomes)
-                            RenderCarSimulation(genome.Simulation);
-
-                        Delay(5);
-                    }
+                    NeuronMutationProbability = 0.2,
+                    RandomnessProvider = this.random,
+                    SimulationFactoryMethod = () => new CarSimulation(this.map),
+                    PostTickMethod = RenderGenomes
                 });
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
             this.currentGeneration = serviceProvider.GetRequiredService<IGeneration<CarSimulation>>();
         }
 
+        private void RenderGenomes(IEnumerable<IGenome<CarSimulation>> genomes)
+        {
+            if(!render)
+                return;
+
+            ClearCanvas();
+
+            foreach (var genome in genomes)
+                RenderCarSimulation(genome.Simulation);
+
+            Delay(1);
+        }
+
         private void GenerateNewMapButton_Click(object sender, RoutedEventArgs e)
         {
             GenerateNewMap();
+            ClearCanvas();
         }
 
         private async void TrainGenerationButton_Click(object sender, RoutedEventArgs e)
         {
-            while(keepRunning)
+            render = true;
+
+            while (keepRunning)
                 currentGeneration = await currentGeneration.EvolveAsync();
         }
 
@@ -182,7 +193,7 @@ namespace MachineLearningPractice
 
         private void RenderCarSimulationSensorReadings(CarSimulation carSimulation)
         {
-            //return;
+            return;
 
             if (carSimulation.HasEnded)
                 return;
@@ -273,9 +284,19 @@ namespace MachineLearningPractice
             MapCanvas.Children.Add(label);
         }
 
-        private void TrainMultipleGenerationsButton_Click(object sender, RoutedEventArgs e)
+        private async void TrainMultipleGenerationsButton_Click(object sender, RoutedEventArgs e)
         {
-            TrainGenerationButton_Click(sender, e);
+            while (keepRunning)
+            {
+                const int generationsToRun = 10;
+                for (var i = 0; i < generationsToRun; i++)
+                {
+                    render = i == generationsToRun - 1;
+                    currentGeneration = await currentGeneration.EvolveAsync();
+                }
+
+                Delay(100);
+            }
         }
 
         private void KeepRunningCheckbox_Checked(object sender, RoutedEventArgs e)

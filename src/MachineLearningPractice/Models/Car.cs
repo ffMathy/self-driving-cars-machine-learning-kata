@@ -37,7 +37,7 @@ namespace MachineLearningPractice.Models
         {
             const int size = Size;
 
-            SpeedVelocity = 2;
+            SpeedVelocity = 5;
 
             BoundingBox = new BoundingBox()
             {
@@ -68,7 +68,7 @@ namespace MachineLearningPractice.Models
             }
 
             var delta = TurnAngleVelocity - previousAngleVelocity;
-            Accelerate(-Math.Abs(delta) / 10000m);
+            Accelerate(-Math.Abs(delta) / 2000m);
 
             return delta;
         }
@@ -76,7 +76,7 @@ namespace MachineLearningPractice.Models
         public decimal Accelerate(decimal deltaVelocity)
         {
             var previousSpeedVelocity = SpeedVelocity;
-            SpeedVelocity += deltaVelocity * 2;
+            SpeedVelocity += deltaVelocity / 2;
 
             EnsureSpeedWithinBounds();
 
@@ -85,8 +85,8 @@ namespace MachineLearningPractice.Models
 
         private void EnsureSpeedWithinBounds()
         {
-            const decimal highThreshold = 30;
-            const decimal lowThreshold = 5m;
+            const decimal highThreshold = 20;
+            const decimal lowThreshold = 2m;
 
             if (SpeedVelocity < lowThreshold)
                 SpeedVelocity = lowThreshold;

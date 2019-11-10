@@ -24,21 +24,10 @@ namespace MachineLearningPractice.Services
         {
             var maps = new List<Map>();
 
-            //return CreateMapBuilder()
+            //maps.Add(CreateMapBuilder()
             //    .MoveInDirection(Direction.Top)
             //    .MoveInDirection(Direction.Top)
             //    .MoveInDirection(Direction.Top)
-            //    .MoveInDirection(Direction.Top)
-            //    .Build();
-
-            //return CreateMapBuilder()
-            //    .MoveInDirection(Direction.Top)
-            //    .MoveInDirection(Direction.Top)
-            //    .MoveInDirection(Direction.Top)
-            //    .MoveInDirection(Direction.Top)
-            //    .MoveInDirection(Direction.Top)
-            //    .MoveInDirection(Direction.Right)
-            //    .MoveInDirection(Direction.Right)
             //    .MoveInDirection(Direction.Right)
             //    .MoveInDirection(Direction.Right)
             //    .MoveInDirection(Direction.Right)
@@ -47,24 +36,22 @@ namespace MachineLearningPractice.Services
             //    .MoveInDirection(Direction.Bottom)
             //    .MoveInDirection(Direction.Bottom)
             //    .MoveInDirection(Direction.Bottom)
-            //    .MoveInDirection(Direction.Bottom)
-            //    .MoveInDirection(Direction.Bottom)
-            //    .MoveInDirection(Direction.Left)
-            //    .MoveInDirection(Direction.Left)
             //    .MoveInDirection(Direction.Left)
             //    .MoveInDirection(Direction.Left)
             //    .MoveInDirection(Direction.Left)
             //    .MoveInDirection(Direction.Left)
             //    .MoveInDirection(Direction.Top)
-            //    .Build();
+            //    .Build());
 
             maps.Add(CreateMapBuilder()
                 .MoveInDirection(Direction.Top)
-                .MoveInDirection(Direction.Right)
-                .MoveInDirection(Direction.Right)
                 .MoveInDirection(Direction.Top)
                 .MoveInDirection(Direction.Top)
-                .MoveInDirection(Direction.Left)
+                .MoveInDirection(Direction.Right)
+                //.MoveInDirection(Direction.Right)
+                //.MoveInDirection(Direction.Right)
+                //.MoveInDirection(Direction.Top)
+                //.MoveInDirection(Direction.Left)
                 .MoveInDirection(Direction.Top)
                 .MoveInDirection(Direction.Right)
                 .MoveInDirection(Direction.Top)
