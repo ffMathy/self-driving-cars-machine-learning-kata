@@ -74,7 +74,7 @@ namespace MachineLearningPractice
             foreach (var genome in genomes)
                 RenderCarSimulation(genome.Simulation);
 
-            Delay(1);
+            Delay(0);
         }
 
         private void GenerateNewMapButton_Click(object sender, RoutedEventArgs e)
@@ -87,8 +87,10 @@ namespace MachineLearningPractice
         {
             render = true;
 
-            while (keepRunning)
+            do
+            {
                 currentGeneration = await currentGeneration.EvolveAsync();
+            } while (keepRunning);
         }
 
         private static void DoEvents()
@@ -108,7 +110,10 @@ namespace MachineLearningPractice
         private static void Delay(int durationInMilliseconds)
         {
             if (durationInMilliseconds == 0)
+            {
+                DoEvents();
                 return;
+            }
 
             var stopwatch = Stopwatch.StartNew();
             while (stopwatch.ElapsedMilliseconds < durationInMilliseconds)
