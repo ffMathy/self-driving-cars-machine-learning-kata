@@ -86,7 +86,7 @@ namespace MachineLearningPractice.Models
         private void EnsureSpeedWithinBounds()
         {
             const decimal highThreshold = 20;
-            const decimal lowThreshold = 2m;
+            const decimal lowThreshold = 3m;
 
             if (SpeedVelocity < lowThreshold)
                 SpeedVelocity = lowThreshold;
