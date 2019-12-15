@@ -40,9 +40,9 @@ namespace MachineLearningPractice.Services
         private long lastProgressLineIncreaseTick;
         private int highestProgressLineOffset;
 
-        public long TicksSurvived { get; private set; }
+        public long TicksSurvived { get; set; }
 
-        public ProgressLine CurrentProgressLine { get; private set; }
+        public ProgressLine CurrentProgressLine { get; set; }
 
         public MapNode CurrentMapNode => CurrentProgressLine?.MapNode;
 
@@ -52,7 +52,20 @@ namespace MachineLearningPractice.Services
 
         public bool HasEnded { get; private set; }
 
-        public double Fitness { get; private set; }
+        public double Fitness
+        {
+            get
+            {
+                var mapNodesLength = map.Nodes.Length;
+
+                var progressPenalty = mapNodesLength - CurrentProgressLine.Offset;
+                var lapPenalty = mapNodesLength * this.laps;
+
+                var timePenalty = -TicksSurvived;
+
+                return timePenalty + ((progressPenalty - lapPenalty) * 30);
+            }
+        }
 
         public CarSimulation(
             Map map)
@@ -79,18 +92,6 @@ namespace MachineLearningPractice.Services
             laps = 0;
 
             CurrentProgressLine = this.map.Nodes.First().ProgressLines.First();
-        }
-
-        private void CalculateFitness()
-        {
-            var lastOffset = map.Nodes.Length;
-
-            var progressPenalty = lastOffset - CurrentProgressLine.Offset;
-            var lapPenalty = lastOffset * this.laps;
-
-            var timePenalty = TicksSurvived;
-
-            Fitness = timePenalty + ((progressPenalty - lapPenalty) * 30);
         }
 
         private ProgressLine GetClosestIntersectionPointProgressLine()
@@ -207,8 +208,8 @@ namespace MachineLearningPractice.Services
             var deltaVelocity = neuralNetCarResponse.AccelerationDeltaVelocity;
             var deltaAngle = neuralNetCarResponse.TurnDeltaAngle;
 
-            deltaVelocity = Car.Accelerate(deltaVelocity);
-            deltaAngle = Car.Turn(deltaAngle);
+            Car.Accelerate(deltaVelocity);
+            Car.Turn(deltaAngle);
 
             Car.Tick();
 
@@ -232,17 +233,7 @@ namespace MachineLearningPractice.Services
                 highestProgressLineOffset = newProgressLine.Offset;
             }
 
-            if (previousProgressLine != null)
-            {
-                if (CurrentProgressLine.Offset == 0 && previousProgressLine.Offset == lastProgressLineOffset)
-                {
-                    laps++;
-                }
-                else if (previousProgressLine.Offset == 0 && CurrentProgressLine.Offset == lastProgressLineOffset)
-                {
-                    laps--;
-                }
-            }
+            CheckForNewLapCount(previousProgressLine);
 
             var isWithinAnyNode = Car.BoundingBox.IsWithin(mapNodeBoundingBoxes);
             if (!isWithinAnyNode)
@@ -252,8 +243,6 @@ namespace MachineLearningPractice.Services
             }
 
             TicksSurvived++;
-
-            CalculateFitness();
 
             if (lastProgressLineIncreaseTick != 0)
             {
@@ -269,6 +258,23 @@ namespace MachineLearningPractice.Services
             {
                 HasEnded = true;
                 return;
+            }
+        }
+
+        private void CheckForNewLapCount(ProgressLine previousProgressLine)
+        {
+            if (previousProgressLine == null)
+            {
+                return;
+            }
+
+            if (CurrentProgressLine.Offset == 0 && previousProgressLine.Offset == lastProgressLineOffset)
+            {
+                laps++;
+            }
+            else if (previousProgressLine.Offset == 0 && CurrentProgressLine.Offset == lastProgressLineOffset)
+            {
+                laps--;
             }
         }
     }

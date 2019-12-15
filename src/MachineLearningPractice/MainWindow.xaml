@@ -29,7 +29,7 @@
         <Button Grid.Column="2" Name="TrainMultipleGenerationsButton" Click="TrainMultipleGenerationsButton_Click" Padding="24">Train multiple generations</Button>
         <Canvas SnapsToDevicePixels="True" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="1" Name="MapCanvas">
             <Canvas.RenderTransform>
-                <ScaleTransform ScaleX="0.5" ScaleY="0.5" />
+                <ScaleTransform ScaleX="1" ScaleY="1" />
             </Canvas.RenderTransform>
         </Canvas>
     </Grid>

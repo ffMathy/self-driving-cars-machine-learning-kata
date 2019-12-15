@@ -51,10 +51,10 @@ namespace MachineLearningPractice
             serviceCollection.AddFluffySpoonNeuroEvolution(
                 new EvolutionSettings<CarSimulation>()
                 {
-                    AmountOfGenomesInPopulation = 200,
-                    AmountOfWorstGenomesToRemovePerGeneration = 180,
+                    AmountOfGenomesInPopulation = 100,
+                    AmountOfWorstGenomesToRemovePerGeneration = 97,
                     NeuronCounts = new[] { 3, 4, 4, 2 },
-                    NeuronMutationProbability = 0.2,
+                    NeuronMutationProbability = 0.1,
                     RandomnessProvider = this.random,
                     SimulationFactoryMethod = () => new CarSimulation(this.map),
                     PostTickMethod = RenderGenomes

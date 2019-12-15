@@ -1,56 +1,60 @@
-//using Microsoft.VisualStudio.TestTools.UnitTesting;
-//using MachineLearningPractice.Models;
-//using MachineLearningPractice.Services;
-//using MachineLearningPractice.Helpers;
-//using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MachineLearningPractice.Models;
+using MachineLearningPractice.Services;
+using MachineLearningPractice.Helpers;
+using System;
+using System.Linq;
 
-//namespace MachineLearningPractice.Tests.Models
-//{
-//    [TestClass]
-//    public class CarTest
-//    {
-//        private Map GenerateCircularMap()
-//        {
-//            var mapBuilder = new MapBuilder();
-//            return mapBuilder
-//                .MoveInDirection(Direction.Top)
-//                .MoveInDirection(Direction.Left)
-//                .MoveInDirection(Direction.Bottom)
-//                .MoveInDirection(Direction.Bottom)
-//                .MoveInDirection(Direction.Right)
-//                .MoveInDirection(Direction.Top)
-//                .Build();
-//        }
+namespace MachineLearningPractice.Tests.Models
+{
+    [TestClass]
+    public class CarTest
+    {
+        private Map GenerateCircularMap()
+        {
+            var mapBuilder = new MapBuilder();
+            return mapBuilder
+                .MoveInDirection(Direction.Top)
+                .MoveInDirection(Direction.Left)
+                .MoveInDirection(Direction.Bottom)
+                .MoveInDirection(Direction.Bottom)
+                .MoveInDirection(Direction.Right)
+                .MoveInDirection(Direction.Top)
+                .Build();
+        }
 
-//        [TestMethod]
-//        public void CarInCenteredBoxShowsCorrectSensorReadings()
-//        {
-//            var random = new Random();
-//            var carNeuralNetwork = new CarNeuralNetwork(random);
+        [TestMethod]
+        public void Fitness_GoodSimulationIsFurtherOnMap_GoodSimulationHasSmallerFitness()
+        {
+            var map = GenerateCircularMap();
 
-//            var map = GenerateCircularMap();
+            var badSimulation = new CarSimulation(map);
+            badSimulation.CurrentProgressLine = map.Nodes
+                .SelectMany(x => x.ProgressLines)
+                .Skip(2)
+                .First();
 
-//            var carSimulation = new CarSimulation(
-//                random,
-//                map,
-//                carNeuralNetwork);
+            var goodSimulation = new CarSimulation(map);
+            goodSimulation.CurrentProgressLine = map.Nodes
+                .SelectMany(x => x.ProgressLines)
+                .Skip(4)
+                .First();
 
-//            carSimulation.Tick();
+            Assert.IsTrue(goodSimulation.Fitness < badSimulation.Fitness);
+        }
 
-//            var readings = carSimulation.SensorReadings;
+        [TestMethod]
+        public void Fitness_GoodSimulationHasSurvivedLonger_GoodSimulationHasSmallerFitness()
+        {
+            var map = GenerateCircularMap();
 
-//            Assert.IsNotNull(readings.LeftSensor);
-//            Assert.IsNotNull(readings.CenterSensor);
-//            Assert.IsNotNull(readings.RightSensor);
+            var badSimulation = new CarSimulation(map);
+            badSimulation.TicksSurvived = 10;
 
-//            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.LeftSensor.Value.IntersectionPoint.X, -50, 0.5));
-//            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.LeftSensor.Value.IntersectionPoint.Y, -50, 0.5));
+            var goodSimulation = new CarSimulation(map);
+            goodSimulation.TicksSurvived = 20;
 
-//            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.CenterSensor.Value.IntersectionPoint.X, 0, 0.5));
-//            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.CenterSensor.Value.IntersectionPoint.Y, -150, 0.5));
-
-//            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.RightSensor.Value.IntersectionPoint.X, 50, 0.5));
-//            Assert.IsTrue(MathHelper.IsEqualWithinRange(readings.RightSensor.Value.IntersectionPoint.Y, -50, 0.5));
-//        }
-//    }
-//}
+            Assert.IsTrue(goodSimulation.Fitness < badSimulation.Fitness);
+        }
+    }
+}
