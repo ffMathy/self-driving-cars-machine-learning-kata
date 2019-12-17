@@ -64,14 +64,14 @@ namespace MachineLearningPractice
             this.currentGeneration = serviceProvider.GetRequiredService<IGeneration<CarSimulation>>();
         }
 
-        private void RenderGenomes(IEnumerable<IGenome<CarSimulation>> genomes)
+        private void RenderGenomes(Genomes<CarSimulation> genomes)
         {
             if(!render)
                 return;
 
             ClearCanvas();
 
-            foreach (var genome in genomes)
+            foreach (var genome in genomes.All)
                 RenderCarSimulation(genome.Simulation);
 
             Delay(0);
