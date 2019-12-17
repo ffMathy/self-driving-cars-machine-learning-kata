@@ -191,6 +191,12 @@ namespace MachineLearningPractice.Services
             return 0;
         }
 
+        public Task ResetAsync()
+        {
+            Car = new Car();
+            return Task.CompletedTask;
+        }
+
         public async Task<double[]> GetInputsAsync()
         {
             SensorReadings = GetSensorReadings();

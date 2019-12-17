@@ -72,7 +72,10 @@ namespace MachineLearningPractice
             ClearCanvas();
 
             foreach (var genome in genomes.All)
-                RenderCarSimulation(genome.Simulation);
+                RenderCarSimulation(genome.Simulation, false);
+
+            foreach (var genome in genomes.Best)
+                RenderCarSimulation(genome.Simulation, true);
 
             Delay(0);
         }
@@ -154,7 +157,7 @@ namespace MachineLearningPractice
             MapCanvas.Children.Add(element);
         }
 
-        private void RenderCarSimulation(CarSimulation carSimulation)
+        private void RenderCarSimulation(CarSimulation carSimulation, bool isBest)
         {
             var car = carSimulation.Car;
 
@@ -162,6 +165,11 @@ namespace MachineLearningPractice
             if (carSimulation.HasEnded)
             {
                 color = Brushes.Red;
+            }
+
+            if (isBest)
+            {
+                color = Brushes.Blue;
             }
 
             var ellipse = new Ellipse()
