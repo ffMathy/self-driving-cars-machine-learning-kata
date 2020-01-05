@@ -61,7 +61,7 @@ namespace MachineLearningPractice.Services
                 var progressPenalty = mapNodesLength - CurrentProgressLine.Offset;
                 var lapPenalty = mapNodesLength * this.laps;
 
-                var timePenalty = -TicksSurvived;
+                var timePenalty = -TicksSurvived * 10;
 
                 return timePenalty + ((progressPenalty - lapPenalty) * 30);
             }
